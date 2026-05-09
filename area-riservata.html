@@ -266,9 +266,38 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
 .bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:8mm;margin-top:6mm}
 .sign-fields{display:flex;flex-direction:column;gap:10px}
 .sign-field{display:flex;flex-direction:column;gap:3px}
-.sign-lbl{font-size:7.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.sign-input{font-family:'DM Sans',sans-serif;font-size:10px;border:none;border-bottom:1px solid rgba(0,0,0,.15);padding:4px 0;outline:none;color:var(--text);background:transparent;width:100%;transition:border-color .2s}
+.sign-lbl{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sign-input{font-family:'DM Sans',sans-serif;font-size:13px;border:none;border-bottom:1px solid rgba(0,0,0,.15);padding:5px 0;outline:none;color:var(--text);background:transparent;width:100%;transition:border-color .2s}
 .sign-input:focus{border-color:var(--gold)}
+
+/* ── SUBMIT SUCCESS OVERLAY ── */
+.submit-overlay{position:fixed;inset:0;z-index:300;background:rgba(12,29,58,.88);display:flex;align-items:center;justify-content:center;padding:20px}
+.submit-overlay-card{background:var(--navy);border:1px solid rgba(184,150,80,.3);max-width:440px;width:100%;padding:48px 36px;text-align:center}
+.submit-ok-mark{width:56px;height:56px;border:2px solid var(--gold);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px;color:var(--gold);margin-bottom:28px}
+.submit-ok-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;font-weight:400;color:#fff;line-height:1.2;margin-bottom:14px}
+.submit-ok-title em{color:var(--gold);font-style:italic}
+.submit-ok-text{font-size:13px;color:rgba(255,255,255,.45);line-height:1.7;margin-bottom:32px}
+.submit-ok-pdf{width:100%;margin-bottom:12px}
+.submit-ok-back{background:none;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);padding:12px 20px;font-family:'DM Sans',sans-serif;font-size:12px;letter-spacing:.06em;cursor:pointer;width:100%;transition:border-color .2s,color .2s}
+.submit-ok-back:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── ADMIN DETAIL MODAL ── */
+.admin-detail-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);display:flex;align-items:flex-start;justify-content:center;padding:calc(var(--nav-h) + 20px) 20px 20px;overflow-y:auto}
+.admin-detail-card{background:#fff;max-width:680px;width:100%;border:1px solid var(--rule);box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.admin-detail-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--rule);background:var(--offwhite)}
+.admin-detail-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;font-weight:500;color:var(--navy)}
+.admin-detail-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);padding:4px 8px;transition:color .2s}
+.admin-detail-close:hover{color:var(--navy)}
+.admin-detail-body{padding:24px}
+.ad-section{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:500;margin-top:20px;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--gold-dim)}
+.ad-section:first-child{margin-top:0}
+.ad-row{display:flex;border-bottom:1px solid var(--rule);padding:10px 0}
+.ad-label{width:160px;flex-shrink:0;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;padding-top:3px}
+.ad-value{font-size:13px;color:var(--text);flex:1}
+.ad-download{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--navy);background:var(--offwhite);border:1px solid var(--rule);padding:6px 14px;cursor:pointer;text-decoration:none;transition:background .2s}
+.ad-download:hover{background:var(--gold-dim)}
+.admin-view-btn{font-family:'DM Sans',sans-serif;font-size:10px;background:var(--offwhite);border:1px solid var(--rule);padding:5px 12px;cursor:pointer;color:var(--navy);transition:background .2s;letter-spacing:.04em}
+.admin-view-btn:hover{background:var(--gold-dim)}
 
 .ftr{border-top:1px solid rgba(184,150,80,.3);padding:6px 20mm;display:flex;justify-content:space-between;align-items:center;margin-top:auto}
 .ftr-left{font-size:7px;color:var(--muted);letter-spacing:.05em;line-height:1.5}
@@ -276,7 +305,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
 
 /* ── PRINT ── */
 @media print{
-  nav,.gold-rule,.form-controls{display:none!important}
+  nav,.gold-rule,.form-controls,.submit-overlay,.admin-detail-overlay{display:none!important}
   #screen-form{padding-top:0!important}
   .form-frame{padding:0!important;background:none!important}
   .sheet{box-shadow:none!important;width:100%!important}
@@ -656,6 +685,37 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
 </div><!-- /screen-form -->
 
 <!-- ══════════════════════════════════════════
+     OVERLAY — CONFERMA INVIO MODULO
+═══════════════════════════════════════════ -->
+<div class="submit-overlay" id="submit-overlay" style="display:none">
+  <div class="submit-overlay-card">
+    <div class="submit-ok-mark">✓</div>
+    <div class="submit-ok-title">Modulo inviato<br>con <em>successo.</em></div>
+    <p class="submit-ok-text">Lo studio riceverà il modulo entro breve.<br>Si consiglia di scaricare una copia PDF come promemoria personale.</p>
+    <button class="login-btn submit-ok-pdf" onclick="downloadPdf()">
+      Scarica PDF promemoria <span class="login-arr">↓</span>
+    </button>
+    <button class="submit-ok-back" onclick="closeSubmitOk()">
+      ← Torna alla dashboard
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL — DETTAGLIO MODULO (Admin)
+═══════════════════════════════════════════ -->
+<div class="admin-detail-overlay" id="admin-detail" style="display:none">
+  <div class="admin-detail-card">
+    <div class="admin-detail-hdr">
+      <span class="admin-detail-title">Dettaglio Modulo</span>
+      <button class="admin-detail-close" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="admin-detail-body" id="admin-detail-body"></div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
      SCREEN 4 — IMPOSTA PASSWORD (invite / recovery)
 ═══════════════════════════════════════════ -->
 <div class="screen" id="screen-setpwd">
@@ -849,7 +909,7 @@ async function loadAdminData() {
 
   const { data, error } = await sb
     .from('moduli_assunzione')
-    .select('id,submitted_by,submitted_at,azienda,sede,cognome_nome,indeterminato,determinato,apprendistato,det_dal,det_al,indet_dal,appr_dal')
+    .select('*')
     .order('submitted_at', { ascending: false });
 
   if (error) {
@@ -863,6 +923,7 @@ async function loadAdminData() {
   }
 
   document.getElementById('admin-count').textContent = data.length;
+  window._adminModuli = data;
 
   const rows = data.map(r => {
     const dt = new Date(r.submitted_at).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
@@ -871,24 +932,98 @@ async function loadAdminData() {
     else if (r.determinato) { tipo = 'Determinato'; badge = 'det'; }
     else if (r.apprendistato) { tipo = 'Apprendistato'; badge = 'appr'; }
     const dataTipo = r.indet_dal || r.det_dal || r.appr_dal || '';
+    const nAlleg = [r.file_doc_identita, r.file_codice_fiscale, r.file_permesso_soggiorno].filter(Boolean).length;
+    const allegBadge = nAlleg ? '<span style="font-size:10px;color:var(--gold);margin-left:4px">📎 '+nAlleg+'</span>' : '';
     return `<tr>
       <td style="white-space:nowrap;color:var(--muted);font-size:11px">${dt}</td>
       <td style="font-size:11px;color:var(--muted)">${r.submitted_by || '—'}</td>
       <td><div class="admin-azienda">${r.azienda || '—'}</div><div class="admin-dip">${r.sede || ''}</div></td>
       <td><div class="admin-azienda">${r.cognome_nome || '—'}</div></td>
       <td>${badge ? `<span class="admin-badge ${badge}">${tipo}</span>` : '—'}</td>
-      <td style="font-size:11px;color:var(--muted);white-space:nowrap">${dataTipo}</td>
+      <td style="font-size:11px;color:var(--muted);white-space:nowrap">${dataTipo}${allegBadge}</td>
+      <td><button class="admin-view-btn" onclick="showDetail('${r.id}')">Dettagli</button></td>
     </tr>`;
   }).join('');
 
   wrap.innerHTML = `<div class="admin-table-wrap">
     <table class="admin-table">
       <thead><tr>
-        <th>Data</th><th>Cliente</th><th>Azienda / Sede</th><th>Dipendente</th><th>Contratto</th><th>Dal</th>
+        <th>Data</th><th>Cliente</th><th>Azienda / Sede</th><th>Dipendente</th><th>Contratto</th><th>Dal</th><th></th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
   </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   ADMIN DETAIL
+═══════════════════════════════════════════════ */
+function showDetail(id) {
+  const r = (window._adminModuli || []).find(m => m.id === id);
+  if (!r) return;
+  const body = document.getElementById('admin-detail-body');
+  const dt = r.submitted_at ? new Date(r.submitted_at).toLocaleString('it-IT') : '—';
+
+  let tipo = '—';
+  if (r.indeterminato) tipo = 'Tempo Indeterminato' + (r.indet_dal ? ' dal ' + r.indet_dal : '');
+  else if (r.determinato) tipo = 'Tempo Determinato' + (r.det_dal ? ' dal ' + r.det_dal : '') + (r.det_al ? ' al ' + r.det_al : '');
+  else if (r.apprendistato) tipo = 'Apprendistato' + (r.appr_dal ? ' dal ' + r.appr_dal : '');
+
+  let orario = r.tempo_pieno ? 'Tempo Pieno' : '';
+  if (r.tempo_parziale) orario = 'Part Time' + (r.perc_parttime ? ' (' + r.perc_parttime + '%)' : '');
+  if (r.ore_totali) orario += (orario ? ' — ' : '') + r.ore_totali + ' ore/sett.';
+
+  let h = '';
+  h += '<div class="ad-section">Invio</div>';
+  h += adRow('Data invio', dt);
+  h += adRow('Inviato da', r.submitted_by);
+  h += '<div class="ad-section">Dati Azienda</div>';
+  h += adRow('Azienda', r.azienda);
+  h += adRow('Sede di lavoro', r.sede);
+  h += '<div class="ad-section">Dati Lavoratore</div>';
+  h += adRow('Cognome e Nome', r.cognome_nome);
+  h += adRow('Codice Fiscale', r.codice_fiscale);
+  h += adRow('Qualifica', r.qualifica);
+  h += adRow('Livello', r.livello);
+  h += adRow('Mansioni', r.mansioni);
+  h += '<div class="ad-section">Contratto e Orario</div>';
+  h += adRow('Tipo contratto', tipo);
+  h += adRow('Orario', orario || '—');
+  h += '<div class="ad-section">Retribuzione (€/mese lordo)</div>';
+  h += adRow('Stipendio', r.stipendio ? '€ ' + r.stipendio + (r.stipendio_note ? ' — ' + r.stipendio_note : '') : '—');
+  h += adRow('Superminimo', r.superminimo ? '€ ' + r.superminimo + (r.superminimo_note ? ' — ' + r.superminimo_note : '') : '—');
+  h += adRow('Altre voci', r.altre_voci ? '€ ' + r.altre_voci + (r.altre_note ? ' — ' + r.altre_note : '') : '—');
+  h += '<div class="ad-section">Note</div>';
+  h += adRow('Note', r.note || 'Nessuna');
+  h += adRow('Firma datore', r.firma_datore);
+  h += adRow('Firma lavoratore', r.firma_lavoratore);
+  h += adRow('Data firma', r.data_firma);
+  h += '<div class="ad-section">Allegati</div>';
+  h += adFileRow('Documento d\'identità', r.file_doc_identita);
+  h += adFileRow('Codice Fiscale', r.file_codice_fiscale);
+  h += adFileRow('Permesso di Soggiorno', r.file_permesso_soggiorno);
+
+  body.innerHTML = h;
+  document.getElementById('admin-detail').style.display = 'flex';
+}
+
+function adRow(label, value) {
+  return '<div class="ad-row"><div class="ad-label">' + label + '</div><div class="ad-value">' + (value || '—') + '</div></div>';
+}
+
+function adFileRow(label, path) {
+  if (!path) return adRow(label, 'Non allegato');
+  return '<div class="ad-row"><div class="ad-label">' + label + '</div><div class="ad-value"><a class="ad-download" onclick="downloadAllegato(\'' + path + '\')">↓ Scarica file</a></div></div>';
+}
+
+async function downloadAllegato(path) {
+  const { data, error } = await sb.storage.from('documenti').createSignedUrl(path, 300);
+  if (error) { alert('Impossibile scaricare il file. ' + error.message); return; }
+  window.open(data.signedUrl, '_blank');
+}
+
+function closeDetail() {
+  document.getElementById('admin-detail').style.display = 'none';
 }
 
 /* ══════════════════════════════════════════════
@@ -999,7 +1134,8 @@ async function submitForm() {
     if (!file) continue;
     const ts = Date.now();
     const ext = file.name.split('.').pop().toLowerCase();
-    const path = 'allegati/' + currentUser.id + '/' + f.col + '_' + ts + '.' + ext;
+    const emailFolder = currentUser.email.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = 'allegati/' + emailFolder + '/' + f.col + '_' + ts + '.' + ext;
     const { error: upErr } = await sb.storage.from('documenti').upload(path, file);
     if (upErr) {
       msgEl.textContent = '✗ Errore upload ' + f.label + ': ' + upErr.message;
@@ -1031,15 +1167,24 @@ async function submitForm() {
           azienda: payload.azienda || '—',
           dipendente: payload.cognome_nome || '—',
           data_invio: new Date().toLocaleString('it-IT'),
-          nota: 'Modulo disponibile nella dashboard Supabase → Table Editor → moduli_assunzione'
+          nota: 'Visualizza il modulo completo nel pannello Admin dell\'Area Riservata'
         })
       });
     } catch (_) {}
-    msgEl.textContent = '✓ Modulo inviato correttamente. Lo studio lo riceverà entro breve.';
-    msgEl.className = 'fc-msg show';
+    document.getElementById('submit-overlay').style.display = 'flex';
   }
   btn.disabled = false;
   btn.innerHTML = 'Invia allo Studio <span class="arr">→</span>';
+}
+
+function downloadPdf() {
+  document.getElementById('submit-overlay').style.display = 'none';
+  window.print();
+}
+
+function closeSubmitOk() {
+  document.getElementById('submit-overlay').style.display = 'none';
+  closeForm();
 }
 
 /* ══════════════════════════════════════════════
