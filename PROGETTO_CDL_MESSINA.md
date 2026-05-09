@@ -317,7 +317,7 @@ Foto profilo: ✅ ATTIVA — file Paolo_Messina.png nel repo
               <img src="Paolo_Messina.png"
                    alt="Paolo Messina — Consulente del Lavoro"
                    style="width:100%;height:100%;object-fit:cover;object-position:center top">
-              Contenuto dentro .chi-photo (aspect-ratio 3/4 desktop, 4/3 mobile)
+              Contenuto dentro .chi-photo (aspect-ratio 3/4 desktop e mobile, max-width:280px centrata su mobile)
 ```
 
 ---
@@ -365,19 +365,19 @@ Foto profilo: ✅ ATTIVA — file Paolo_Messina.png nel repo
 - [x] **Logo visibile in navbar** — ✅ risolto con Logo_transparent.png (2026-05-09)
 - [x] **Foto profilo Paolo Messina** — ✅ Paolo_Messina.png attivo in #chi-sono (2026-05-09)
 - [x] **Nome Studio visibile nel hero** — ✅ aggiunto elemento .hero-studio (2026-05-09)
-- [ ] **Supabase ANON KEY** — verificare che sia incollata correttamente in area-riservata.html
+- [x] **Supabase ANON KEY** — ✅ verificata: JWT reale presente in area-riservata.html riga 25 (2026-05-09)
 - [ ] **Redirect URL Supabase** — aggiornare a `https://www.cdlmessina.it/area-riservata.html` quando dominio attivo
 
 ### 🟡 Importante (P1)
 - [x] **Collegamento Area Riservata** — ✅ link nel footer di index.html (2026-05-09)
 - [ ] **Dominio cdlmessina.it** — configurare DNS su Vercel (Settings → Domains)
-- [ ] **Notifiche email** — Supabase Webhooks → trigger su insert `moduli_assunzione` → POST a Formspree/Resend
+- [x] **Notifiche email a Paolo** — ✅ implementato: POST a Formspree dopo insert Supabase in submitForm() (2026-05-09)
 
-### 🟢 Fase 2
-- [ ] **Adempimenti Sicurezza** — convertire template A4 in form compilabile
-- [ ] **Upload documenti dal cliente** — Storage bucket "uploads-clienti" con RLS per-utente
-- [ ] **Pannello admin** — `admin.html` protetta: visualizza moduli, carica documenti, gestisce clienti
-- [ ] **Notifiche cliente** — email automatica quando Paolo carica nuovo documento
+### 🟢 Fase 2 — Portale Clienti (priorità da definire)
+- [ ] **Pannello admin** — `admin.html` protetta per Paolo: visualizza moduli ricevuti, carica documenti nel bucket, gestisce account clienti senza accedere alla Supabase Dashboard
+- [ ] **Notifica email al cliente** — email automatica quando Paolo carica un nuovo documento nel bucket `documenti`
+- [ ] **Upload documenti dal cliente** — bucket "uploads-clienti" con RLS per-utente; cliente può caricare documenti (es. da firmare) e Paolo li vede nel pannello admin
+- [ ] **Adempimenti Sicurezza** — convertire template A4 (D.Lgs. 81/08) in form compilabile con stesso pattern del Modulo Assunzione
 
 ---
 

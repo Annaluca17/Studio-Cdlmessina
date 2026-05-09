@@ -778,6 +778,21 @@ async function submitForm() {
     msgEl.textContent = '✗ Errore invio. Inviare per email a segreteria@cdlmessina.it';
     msgEl.className = 'fc-msg show err';
   } else {
+    // Notifica email a Paolo via Formspree
+    try {
+      await fetch('https://formspree.io/f/meevlvwk', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          _subject: 'Nuovo modulo assunzione da ' + currentUser.email,
+          mittente: currentUser.email,
+          azienda: payload.azienda || '—',
+          dipendente: payload.cognome_nome || '—',
+          data_invio: new Date().toLocaleString('it-IT'),
+          nota: 'Modulo disponibile nella dashboard Supabase → Table Editor → moduli_assunzione'
+        })
+      });
+    } catch (_) { /* notifica non bloccante */ }
     msgEl.textContent = '✓ Modulo inviato correttamente. Lo studio lo riceverà entro breve.';
     msgEl.className = 'fc-msg show';
   }
