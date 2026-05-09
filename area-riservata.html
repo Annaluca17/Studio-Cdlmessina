@@ -24,15 +24,7 @@
 const SUPABASE_URL  = 'https://zhrvcklhcbdzkgzlonbr.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpocnZja2xoY2JkemtnemxvbmJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyOTI1MzcsImV4cCI6MjA5Mjg2ODUzN30.Vlk1gPpp6KyCdB_aJg8gmKil3TouNs9o3p-Dkh1CZk4';
 
-// ─── Lista documenti disponibili per il download ─────────────────────
-// Per aggiungere un documento: copiare una riga e modificare nome/file/data
-// Il file deve essere caricato nel bucket "documenti" di Supabase Storage
-const DOCUMENTI = [
-  { nome: 'Adempimenti Sicurezza sul Lavoro 2025', file: 'adempimenti-sicurezza-2025.pdf', data: '2025-04-01', tag: 'Sicurezza' },
-  { nome: 'Circolare INPS n. 45/2025',             file: 'circolare-inps-45-2025.pdf',    data: '2025-03-15', tag: 'Previdenza' },
-  { nome: 'Guida Welfare Aziendale',               file: 'guida-welfare-2025.pdf',        data: '2025-02-10', tag: 'HR' },
-];
-// ─────────────────────────────────────────────────────────────────────
+// I documenti sono ora gestiti dalla tabella documenti_cliente su Supabase
 </script>
 
 <style>
@@ -298,6 +290,21 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
 .admin-view-btn{font-family:'DM Sans',sans-serif;font-size:10px;background:var(--offwhite);border:1px solid var(--rule);padding:5px 12px;cursor:pointer;color:var(--navy);transition:background .2s;letter-spacing:.04em}
 .admin-view-btn:hover{background:var(--gold-dim)}
 
+/* ── ADMIN UPLOAD DOCUMENTI ── */
+.admin-upload{background:#fff;border:1px solid var(--rule);padding:24px;margin-bottom:28px}
+.au-row{display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap}
+.au-field{display:flex;flex-direction:column;gap:6px;flex:1;min-width:180px}
+.au-field label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.au-field input[type=text],.au-field select{font-family:'DM Sans',sans-serif;font-size:13px;border:none;border-bottom:1px solid var(--rule);padding:8px 0;color:var(--text);outline:none;background:transparent;width:100%}
+.au-field select{cursor:pointer}
+.au-field input:focus,.au-field select:focus{border-color:var(--gold)}
+.au-actions{display:flex;align-items:center;gap:16px;margin-top:8px}
+.au-btn{font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;background:var(--navy);color:#fff;border:none;padding:10px 22px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .2s}
+.au-btn:hover{background:var(--navy2)}
+.au-btn:disabled{opacity:.45;cursor:not-allowed}
+.au-msg{font-size:12px}
+.admin-sep{margin-top:48px;padding-top:32px;border-top:1px solid var(--rule)}
+
 .ftr{border-top:1px solid rgba(184,150,80,.3);padding:6px 20mm;display:flex;justify-content:space-between;align-items:center;margin-top:auto}
 .ftr-left{font-size:7px;color:var(--muted);letter-spacing:.05em;line-height:1.5}
 .ftr-right{font-size:7px;color:var(--gold);letter-spacing:.07em;text-transform:uppercase;text-align:right}
@@ -417,8 +424,11 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
       </div>
     </div>
 
-    <!-- TAB: Admin (solo paolo.messina@cdlmessina.it) -->
+    <!-- TAB: Admin (solo segreteria@cdlmessina.it) -->
     <div class="tab-panel" id="panel-admin">
+
+      <!-- Sezione 1: Moduli ricevuti -->
+      <div class="page-tag" style="margin-bottom:14px"><div class="page-tag-line"></div><div class="page-tag-text">Moduli Ricevuti</div></div>
       <div class="admin-toolbar">
         <div class="admin-count">Moduli ricevuti: <strong id="admin-count">—</strong></div>
         <button class="admin-refresh" onclick="loadAdminData()">↻ Aggiorna</button>
@@ -426,6 +436,55 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
       <div id="admin-table-wrap">
         <div class="admin-loading">Caricamento…</div>
       </div>
+
+      <!-- Sezione 2: Gestione Documenti -->
+      <div class="admin-sep">
+        <div class="page-tag" style="margin-bottom:20px"><div class="page-tag-line"></div><div class="page-tag-text">Carica Documento per i Clienti</div></div>
+        <div class="admin-upload">
+          <div class="au-row">
+            <div class="au-field">
+              <label for="adm-doc-nome">Nome Documento *</label>
+              <input type="text" id="adm-doc-nome" placeholder="es. Circolare INPS n.45/2025">
+            </div>
+            <div class="au-field">
+              <label for="adm-doc-tag">Categoria</label>
+              <select id="adm-doc-tag">
+                <option value="Generale">Generale</option>
+                <option value="Sicurezza">Sicurezza</option>
+                <option value="Previdenza">Previdenza</option>
+                <option value="HR">HR</option>
+                <option value="Fiscale">Fiscale</option>
+                <option value="Avviso">Avviso</option>
+              </select>
+            </div>
+          </div>
+          <div class="au-row">
+            <div class="au-field">
+              <label for="adm-doc-dest">Destinatario</label>
+              <select id="adm-doc-dest">
+                <option value="">★ Tutti i clienti</option>
+              </select>
+            </div>
+            <div class="au-field">
+              <label>File (PDF, immagine, documento) *</label>
+              <input type="file" id="adm-doc-file" accept=".pdf,.doc,.docx,.xls,.xlsx,image/*" class="alleg-file-input" style="margin-left:0">
+            </div>
+          </div>
+          <div class="au-actions">
+            <button class="au-btn" id="adm-doc-btn" onclick="adminUploadDoc()">Carica documento <span style="color:var(--gold)">→</span></button>
+            <span class="au-msg" id="adm-doc-msg"></span>
+          </div>
+        </div>
+
+        <div class="admin-toolbar" style="margin-top:24px">
+          <div class="admin-count">Documenti caricati: <strong id="admin-doc-count">—</strong></div>
+          <button class="admin-refresh" onclick="loadAdminDocs()">↻ Aggiorna</button>
+        </div>
+        <div id="admin-doc-list">
+          <div class="admin-loading">Caricamento…</div>
+        </div>
+      </div>
+
     </div>
 
     <!-- TAB: Account -->
@@ -872,7 +931,11 @@ function showApp(user) {
   // Mostra tab Admin solo per Paolo
   const isAdmin = user.email === ADMIN_EMAIL;
   document.getElementById('tab-admin').style.display = isAdmin ? '' : 'none';
-  if (isAdmin) loadAdminData();
+  if (isAdmin) {
+    loadAdminData();
+    loadUtenti();
+    loadAdminDocs();
+  }
   renderDocuments();
 }
 
@@ -1026,37 +1089,162 @@ function closeDetail() {
 }
 
 /* ══════════════════════════════════════════════
-   DOCUMENTS
+   DOCUMENTS (client-facing, da DB)
 ═══════════════════════════════════════════════ */
-function renderDocuments() {
+async function renderDocuments() {
   const wrap = document.getElementById('doc-list-wrap');
-  if (!DOCUMENTI.length) {
-    wrap.innerHTML = '<div class="doc-empty">Nessun documento disponibile al momento.<br>Lo studio provvederà a caricare i documenti di sua competenza.</div>';
+  wrap.innerHTML = '<div class="doc-empty" style="color:var(--muted)">Caricamento documenti…</div>';
+
+  const { data, error } = await sb.from('documenti_cliente')
+    .select('*').order('created_at', { ascending: false });
+
+  if (error || !data || !data.length) {
+    wrap.innerHTML = '<div class="doc-empty">Nessun documento disponibile al momento.<br>Lo studio provvederà a caricare i documenti.</div>';
     return;
   }
-  wrap.innerHTML = '<div class="doc-grid">' + DOCUMENTI.map(doc => `
-    <div class="doc-row">
-      <div class="doc-icon">PDF</div>
+
+  wrap.innerHTML = '<div class="doc-grid">' + data.map(doc => {
+    const dt = new Date(doc.created_at).toLocaleDateString('it-IT', { day:'2-digit', month:'long', year:'numeric' });
+    const ext = doc.file_path.split('.').pop().toUpperCase();
+    const icon = ext === 'PDF' ? 'PDF' : ext.length <= 4 ? ext : 'DOC';
+    const broadcast = !doc.user_id ? '<span style="font-size:8px;color:var(--gold);margin-left:6px">★</span>' : '';
+    return `<div class="doc-row">
+      <div class="doc-icon">${icon}</div>
       <div class="doc-info">
-        <div class="doc-name">${doc.nome}</div>
+        <div class="doc-name">${doc.nome}${broadcast}</div>
         <div class="doc-meta">
-          <span>${formatDate(doc.data)}</span>
+          <span>${dt}</span>
           <span class="doc-tag">${doc.tag}</span>
         </div>
       </div>
-      <a class="doc-dl" onclick="downloadDoc('${doc.file}')">Scarica <span class="arr">↓</span></a>
-    </div>`).join('') + '</div>';
+      <a class="doc-dl" onclick="downloadDoc('${doc.file_path}')">Scarica <span class="arr">↓</span></a>
+    </div>`;
+  }).join('') + '</div>';
 }
 
-async function downloadDoc(filename) {
-  const { data, error } = await sb.storage.from('documenti').createSignedUrl(filename, 60);
+async function downloadDoc(path) {
+  const { data, error } = await sb.storage.from('documenti').createSignedUrl(path, 300);
   if (error) { alert('Documento non disponibile. Contattare lo studio.'); return; }
   window.open(data.signedUrl, '_blank');
 }
 
-function formatDate(d) {
-  const dt = new Date(d);
-  return dt.toLocaleDateString('it-IT', { day:'2-digit', month:'long', year:'numeric' });
+/* ══════════════════════════════════════════════
+   ADMIN: Gestione Documenti
+═══════════════════════════════════════════════ */
+async function loadUtenti() {
+  const { data, error } = await sb.rpc('get_utenti');
+  if (error || !data) return;
+  window._utentiMap = {};
+  const sel = document.getElementById('adm-doc-dest');
+  data.forEach(u => {
+    window._utentiMap[u.id] = u.email;
+    if (u.email === ADMIN_EMAIL) return;
+    const opt = document.createElement('option');
+    opt.value = u.id;
+    opt.textContent = u.email;
+    sel.appendChild(opt);
+  });
+}
+
+async function adminUploadDoc() {
+  const nome = document.getElementById('adm-doc-nome').value.trim();
+  const tag = document.getElementById('adm-doc-tag').value;
+  const destId = document.getElementById('adm-doc-dest').value;
+  const fileInput = document.getElementById('adm-doc-file');
+  const file = fileInput.files[0];
+  const msgEl = document.getElementById('adm-doc-msg');
+  const btn = document.getElementById('adm-doc-btn');
+
+  if (!nome || !file) {
+    msgEl.textContent = '✗ Inserire nome e file';
+    msgEl.style.color = 'var(--err)';
+    return;
+  }
+
+  btn.disabled = true;
+  msgEl.textContent = 'Caricamento…';
+  msgEl.style.color = 'var(--muted)';
+
+  const ts = Date.now();
+  const ext = file.name.split('.').pop().toLowerCase();
+  const folder = destId ? 'clienti/' + destId : 'broadcast';
+  const safeName = nome.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = 'condivisi/' + folder + '/' + safeName + '_' + ts + '.' + ext;
+
+  const { error: upErr } = await sb.storage.from('documenti').upload(path, file);
+  if (upErr) {
+    msgEl.textContent = '✗ Errore upload: ' + upErr.message;
+    msgEl.style.color = 'var(--err)';
+    btn.disabled = false;
+    return;
+  }
+
+  const { error } = await sb.from('documenti_cliente').insert([{
+    user_id: destId || null,
+    nome: nome,
+    file_path: path,
+    tag: tag,
+    created_by: currentUser.email
+  }]);
+
+  if (error) {
+    msgEl.textContent = '✗ Errore salvataggio: ' + error.message;
+    msgEl.style.color = 'var(--err)';
+  } else {
+    msgEl.textContent = '✓ Documento caricato' + (destId ? '' : ' per tutti i clienti');
+    msgEl.style.color = 'var(--ok)';
+    document.getElementById('adm-doc-nome').value = '';
+    fileInput.value = '';
+    document.getElementById('adm-doc-dest').value = '';
+    loadAdminDocs();
+  }
+  btn.disabled = false;
+}
+
+async function loadAdminDocs() {
+  const wrap = document.getElementById('admin-doc-list');
+  const { data, error } = await sb.from('documenti_cliente')
+    .select('*').order('created_at', { ascending: false });
+
+  if (error || !data || !data.length) {
+    wrap.innerHTML = '<div class="admin-empty">Nessun documento caricato.</div>';
+    document.getElementById('admin-doc-count').textContent = '0';
+    return;
+  }
+
+  document.getElementById('admin-doc-count').textContent = data.length;
+  const map = window._utentiMap || {};
+
+  const rows = data.map(d => {
+    const dest = d.user_id ? (map[d.user_id] || d.user_id) : '★ Tutti';
+    const dt = new Date(d.created_at).toLocaleDateString('it-IT');
+    return `<tr>
+      <td style="font-size:11px;color:var(--muted);white-space:nowrap">${dt}</td>
+      <td><div class="admin-azienda">${d.nome}</div></td>
+      <td><span class="doc-tag">${d.tag}</span></td>
+      <td style="font-size:11px;color:var(--muted)">${dest}</td>
+      <td style="white-space:nowrap">
+        <button class="admin-view-btn" onclick="downloadDoc('${d.file_path}')">↓ Scarica</button>
+        <button class="admin-view-btn" style="color:var(--err);margin-left:4px" onclick="deleteDoc('${d.id}','${d.file_path}')">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead><tr>
+        <th>Data</th><th>Documento</th><th>Tipo</th><th>Destinatario</th><th></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+async function deleteDoc(id, filePath) {
+  if (!confirm('Eliminare questo documento?')) return;
+  await sb.storage.from('documenti').remove([filePath]);
+  await sb.from('documenti_cliente').delete().eq('id', id);
+  loadAdminDocs();
 }
 
 /* ══════════════════════════════════════════════
