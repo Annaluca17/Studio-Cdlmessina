@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Area Riservata — Studio CDL Paolo Messina</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="Logo_migliorato.png">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+/* ═══════════════════════════════════════════
+   ⚙️  CONFIGURAZIONE — modificare questi valori
+   dopo aver creato il progetto su supabase.com
+════════════════════════════════════════════ */
+</style>
+
+<script>
+// ╔══════════════════════════════════════════════╗
+// ║  INCOLLARE QUI I DATI DA supabase.com        ║
+// ║  Settings → API → Project URL + anon key     ║
+// ╚══════════════════════════════════════════════╝
+const SUPABASE_URL  = 'https://zhrvcklhcbdzkgzlonbr.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpocnZja2xoY2JkemtnemxvbmJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyOTI1MzcsImV4cCI6MjA5Mjg2ODUzN30.Vlk1gPpp6KyCdB_aJg8gmKil3TouNs9o3p-Dkh1CZk4';
+
+// ─── Lista documenti disponibili per il download ─────────────────────
+// Per aggiungere un documento: copiare una riga e modificare nome/file/data
+// Il file deve essere caricato nel bucket "documenti" di Supabase Storage
+const DOCUMENTI = [
+  { nome: 'Adempimenti Sicurezza sul Lavoro 2025', file: 'adempimenti-sicurezza-2025.pdf', data: '2025-04-01', tag: 'Sicurezza' },
+  { nome: 'Circolare INPS n. 45/2025',             file: 'circolare-inps-45-2025.pdf',    data: '2025-03-15', tag: 'Previdenza' },
+  { nome: 'Guida Welfare Aziendale',               file: 'guida-welfare-2025.pdf',        data: '2025-02-10', tag: 'HR' },
+];
+// ─────────────────────────────────────────────────────────────────────
+</script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#0c1d3a;--navy2:#163660;--blue:#1e6db5;
+  --gold:#b89650;--gold-dim:rgba(184,150,80,.22);
+  --cream:#f4f1ea;--offwhite:#faf9f7;--white:#fff;
+  --text:#1a1a18;--muted:#6b6b6a;--rule:rgba(0,0,0,.09);
+  --nav-h:62px;--ok:#2d7a4f;--err:#c0392b;
+}
+html,body{height:100%;font-family:'DM Sans',system-ui,sans-serif;color:var(--text);background:var(--offwhite)}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h);padding:0 5%}
+.nav-logo img{height:30px;display:block;filter:brightness(0) invert(1)}
+.nav-right{display:flex;align-items:center;gap:20px}
+.nav-user{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.38)}
+.nav-logout{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);cursor:pointer;background:none;border:1px solid var(--gold-dim);padding:6px 14px;transition:background .2s}
+.nav-logout:hover{background:var(--gold-dim)}
+.gold-rule{height:1px;background:linear-gradient(to right,rgba(184,150,80,.7),rgba(184,150,80,.15),transparent);position:fixed;top:var(--nav-h);left:0;width:100%;z-index:200}
+
+/* ── SCREENS ── */
+.screen{display:none;width:100%;min-height:100vh}
+.screen.active{display:flex}
+
+/* ── LOGIN SCREEN ── */
+#screen-login{align-items:center;justify-content:center;background:var(--navy);flex-direction:column;gap:0}
+.login-wrap{width:100%;max-width:400px;padding:24px}
+.login-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:36px}
+.login-line{width:20px;height:1px;background:var(--gold)}
+.login-eye-text{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.login-logo{height:36px;filter:brightness(0) invert(1);margin-bottom:48px;display:block}
+.login-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;font-weight:400;color:#fff;line-height:1.15;margin-bottom:8px}
+.login-title em{color:var(--gold);font-style:italic}
+.login-sub{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:40px;line-height:1.7}
+.lf{display:flex;flex-direction:column;gap:22px}
+.lf-row{display:flex;flex-direction:column;gap:7px}
+.lf-row label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.35);font-weight:500}
+.lf-row input{font-family:'DM Sans',sans-serif;font-size:14px;background:rgba(255,255,255,.06);border:none;border-bottom:1px solid rgba(255,255,255,.15);padding:10px 0;color:#fff;outline:none;transition:border-color .2s;width:100%}
+.lf-row input::placeholder{color:rgba(255,255,255,.2)}
+.lf-row input:focus{border-color:var(--gold)}
+.login-btn{background:var(--gold);color:var(--navy);border:none;padding:14px 0;font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;letter-spacing:.03em;margin-top:8px;transition:opacity .2s}
+.login-btn:hover{opacity:.88}
+.login-btn:disabled{opacity:.45;cursor:not-allowed}
+.login-arr{font-size:18px}
+.login-msg{font-size:12px;padding:10px 0;min-height:32px;color:var(--err)}
+.login-footer{margin-top:48px;font-size:10px;color:rgba(255,255,255,.2);letter-spacing:.05em}
+
+/* ── APP SCREEN ── */
+#screen-app{flex-direction:column;padding-top:var(--nav-h)}
+.app-body{padding:48px 5%;max-width:1100px;width:100%;margin:0 auto;flex:1}
+
+/* ── TABS ── */
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--rule);margin-bottom:40px}
+.tab{padding:12px 24px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s;font-weight:500}
+.tab.active{color:var(--navy);border-color:var(--gold)}
+
+/* ── PAGE HEADER ── */
+.page-hdr{margin-bottom:36px}
+.page-tag{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.page-tag-line{width:18px;height:1px;background:var(--gold)}
+.page-tag-text{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);font-weight:500}
+.page-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(24px,3vw,38px);font-weight:400;color:var(--navy);line-height:1.1}
+.page-title em{color:var(--gold);font-style:italic}
+.page-sub{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.75}
+
+/* ── TAB PANELS ── */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── DOCUMENTS ── */
+.doc-grid{display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.doc-row{background:#fff;padding:20px 24px;display:flex;align-items:center;gap:20px;transition:background .2s}
+.doc-row:hover{background:var(--offwhite)}
+.doc-icon{width:36px;height:36px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:var(--gold)}
+.doc-info{flex:1;min-width:0}
+.doc-name{font-size:13.5px;font-weight:500;color:var(--navy);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc-meta{font-size:10px;color:var(--muted);display:flex;gap:12px}
+.doc-tag{font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);border:1px solid rgba(30,109,181,.2);padding:2px 7px;white-space:nowrap}
+.doc-dl{font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;background:var(--navy);color:#fff;border:none;padding:9px 18px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .2s;white-space:nowrap;text-decoration:none;flex-shrink:0}
+.doc-dl:hover{background:var(--navy2)}
+.doc-dl .arr{color:var(--gold)}
+.doc-empty{padding:48px 24px;text-align:center;color:var(--muted);font-size:13px;background:#fff;border:1px solid var(--rule)}
+
+/* ── FORMS LIST ── */
+.form-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.form-card{background:#fff;padding:28px 24px;transition:background .2s;cursor:pointer;position:relative}
+.form-card:hover{background:var(--offwhite)}
+.form-card-bar{width:20px;height:1px;background:var(--gold);margin-bottom:16px;transition:width .3s}
+.form-card:hover .form-card-bar{width:36px}
+.form-card-num{font-size:9px;color:var(--gold);letter-spacing:.1em;margin-bottom:12px;font-family:'Cormorant Garamond',serif}
+.form-card-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;font-weight:500;color:var(--navy);margin-bottom:8px;line-height:1.3}
+.form-card-desc{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.form-card-cta{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:6px}
+
+/* ── CHANGE PASSWORD ── */
+.pwd-section{max-width:420px}
+.pwd-note{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.75;padding:14px;background:#fff;border-left:3px solid var(--gold-dim)}
+.pwd-form{display:flex;flex-direction:column;gap:20px}
+.pf-row{display:flex;flex-direction:column;gap:7px}
+.pf-row label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.pf-row input{font-family:'DM Sans',sans-serif;font-size:13.5px;border:none;border-bottom:1px solid var(--rule);padding:9px 0;color:var(--text);outline:none;transition:border-color .2s;background:transparent;width:100%}
+.pf-row input:focus{border-color:var(--gold)}
+.pwd-btn{background:var(--navy);color:#fff;border:none;padding:13px 22px;font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:space-between;width:100%;margin-top:8px}
+.pwd-btn:hover{background:var(--navy2)}
+.pwd-btn:disabled{opacity:.45;cursor:not-allowed}
+.pwd-msg{font-size:12px;padding:8px 0;min-height:28px}
+.pwd-msg.ok{color:var(--ok)}
+.pwd-msg.err{color:var(--err)}
+
+/* ── FORM SCREEN (moduli compilabili) ── */
+#screen-form{flex-direction:column;background:#d6d3ce;padding-top:var(--nav-h)}
+.form-controls{display:flex;align-items:center;gap:12px;background:#fff;padding:10px 5%;border-bottom:1px solid var(--rule);flex-wrap:wrap;position:sticky;top:var(--nav-h);z-index:100}
+.fc-back{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;transition:color .2s;background:none;border:none;font-family:'DM Sans',sans-serif}
+.fc-back:hover{color:var(--navy)}
+.fc-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);flex:1;padding:0 12px}
+.fc-send{font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;background:var(--navy);color:#fff;border:none;padding:9px 20px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .2s}
+.fc-send:hover{background:var(--navy2)}
+.fc-send:disabled{opacity:.45;cursor:not-allowed}
+.fc-send .arr{color:var(--gold)}
+.fc-print{font-family:'Cormorant Garamond',Georgia,serif;font-size:15px;background:transparent;color:var(--navy);border:1px solid var(--rule);padding:9px 20px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .2s}
+.fc-print:hover{background:var(--offwhite)}
+.fc-print .arr{color:var(--gold)}
+.fc-msg{font-size:11px;color:var(--ok);padding:0 8px;display:none}
+.fc-msg.show{display:block}
+.fc-msg.err{color:var(--err)}
+.form-frame{display:flex;flex-direction:column;align-items:center;padding:32px 20px 60px;gap:0}
+
+/* ── A4 SHEET (modulo) ── */
+.sheet{width:210mm;min-height:297mm;background:#fff;position:relative;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 32px rgba(0,0,0,.18)}
+.watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:280px;height:280px;opacity:.04;pointer-events:none;z-index:0;display:flex;align-items:center;justify-content:center}
+.watermark img{width:100%;filter:grayscale(1)}
+.sheet>*:not(.watermark){position:relative;z-index:1}
+.hdr{background:var(--navy);padding:14px 20mm;display:flex;align-items:center;justify-content:space-between}
+.hdr-logo{mix-blend-mode:screen;height:32px;display:block}
+.hdr-right{text-align:right}
+.hdr-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;font-weight:500;color:#fff;letter-spacing:.03em}
+.hdr-sub{font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.38)}
+.gold-rule-doc{height:2px;background:linear-gradient(to right,#b89650,rgba(184,150,80,.25),transparent)}
+.doc-title-bar{background:var(--offwhite);border-bottom:1px solid rgba(0,0,0,.07);padding:10px 20mm;display:flex;align-items:baseline;justify-content:space-between}
+.doc-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:17px;font-weight:500;color:var(--navy);letter-spacing:.03em}
+.doc-num{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:500}
+.body{padding:8mm 20mm;flex:1}
+.sec-head{display:flex;align-items:center;gap:8px;margin:6mm 0 4mm}
+.sec-head-line{width:16px;height:1px;background:var(--gold);flex-shrink:0}
+.sec-head-label{font-size:8px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--gold)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:5mm 8mm}
+.fg.c3{grid-template-columns:1fr 1fr 1fr}
+.fg.c1{grid-template-columns:1fr}
+.fi{display:flex;flex-direction:column;gap:3px}
+.fi.s2{grid-column:span 2}
+.fi.s3{grid-column:span 3}
+.fi label{font-size:7.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.fi input,.fi select,.fi textarea{font-family:'DM Sans',sans-serif;font-size:11px;border:none;border-bottom:1px solid rgba(0,0,0,.15);padding:4px 0;outline:none;color:var(--text);background:transparent;width:100%;transition:border-color .2s}
+.fi input:focus,.fi select:focus,.fi textarea:focus{border-color:var(--gold);background:rgba(184,150,80,.04)}
+.fi textarea{resize:vertical;min-height:40px}
+.fi select{appearance:none;cursor:pointer}
+
+/* schedule table */
+.sched{width:100%;border-collapse:collapse;font-size:9px;margin-top:3mm}
+.sched th{background:var(--navy);color:rgba(255,255,255,.7);padding:5px 6px;text-align:left;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.sched th:first-child{color:var(--gold)}
+.sched td{border-bottom:1px solid rgba(0,0,0,.07);padding:4px 6px;vertical-align:middle}
+.sched tr:last-child td{border-bottom:none}
+.sched .tot td{background:var(--offwhite);font-weight:500;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--navy)}
+.sched input{font-size:10px;width:100%;border:none;border-bottom:1px solid rgba(0,0,0,.1);background:transparent;outline:none;padding:2px 0;text-align:center;font-family:'DM Sans',sans-serif;color:var(--text)}
+.sched input:focus{border-color:var(--gold)}
+
+/* contract checkboxes */
+.contract-opts{display:flex;flex-wrap:wrap;gap:6mm;margin-top:3mm;align-items:flex-start}
+.co{display:flex;flex-direction:column;gap:4px}
+.co-top{display:flex;align-items:center;gap:5px;font-size:10px}
+.co input[type=checkbox]{accent-color:var(--gold);width:12px;height:12px;cursor:pointer;flex-shrink:0}
+.co-dates{display:flex;gap:6px;margin-left:17px;flex-wrap:wrap}
+.co-dates input{font-size:9px;width:26mm;border:none;border-bottom:1px solid rgba(0,0,0,.12);background:transparent;outline:none;padding:2px 0;font-family:'DM Sans',sans-serif;color:var(--text);text-align:center}
+.co-dates input:focus{border-color:var(--gold)}
+.co-dates label{font-size:8px;color:var(--muted);align-self:center;white-space:nowrap}
+
+/* retrib */
+.retrib{width:100%;border-collapse:collapse;font-size:9px;margin-top:3mm}
+.retrib th{background:var(--navy);color:rgba(255,255,255,.7);padding:5px 8px;text-align:left;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.retrib th:first-child{color:var(--gold)}
+.retrib td{border-bottom:1px solid rgba(0,0,0,.07);padding:5px 8px;vertical-align:middle}
+.retrib tr:last-child td{border-bottom:none}
+.retrib input{font-size:10px;width:100%;border:none;border-bottom:1px solid rgba(0,0,0,.1);background:transparent;outline:none;padding:2px 0;font-family:'DM Sans',sans-serif;color:var(--text)}
+.retrib input:focus{border-color:var(--gold)}
+
+/* allegati checkboxes */
+.alleg-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.alleg-item{display:flex;align-items:center;gap:7px;font-size:10px}
+.alleg-item input[type=checkbox]{accent-color:var(--gold);width:12px;height:12px;cursor:pointer}
+
+/* send box */
+.send-box{background:var(--navy);padding:5mm 6mm;margin-top:6mm}
+.send-title{font-size:8px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.send-text{font-size:9px;color:rgba(255,255,255,.65);line-height:1.65}
+.send-text strong{color:#fff}
+.send-email{color:var(--gold)}
+
+/* bottom row */
+.bottom-row{display:grid;grid-template-columns:1fr 1fr;gap:8mm;margin-top:6mm}
+.sign-fields{display:flex;flex-direction:column;gap:10px}
+.sign-field{display:flex;flex-direction:column;gap:3px}
+.sign-lbl{font-size:7.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sign-input{font-family:'DM Sans',sans-serif;font-size:10px;border:none;border-bottom:1px solid rgba(0,0,0,.15);padding:4px 0;outline:none;color:var(--text);background:transparent;width:100%;transition:border-color .2s}
+.sign-input:focus{border-color:var(--gold)}
+
+.ftr{border-top:1px solid rgba(184,150,80,.3);padding:6px 20mm;display:flex;justify-content:space-between;align-items:center;margin-top:auto}
+.ftr-left{font-size:7px;color:var(--muted);letter-spacing:.05em;line-height:1.5}
+.ftr-right{font-size:7px;color:var(--gold);letter-spacing:.07em;text-transform:uppercase;text-align:right}
+
+/* ── PRINT ── */
+@media print{
+  nav,.gold-rule,.form-controls{display:none!important}
+  #screen-form{padding-top:0!important}
+  .form-frame{padding:0!important;background:none!important}
+  .sheet{box-shadow:none!important;width:100%!important}
+  .fi input,.fi select,.fi textarea,.sched input,.retrib input,.co-dates input,.sign-input{
+    border-bottom:1px solid rgba(0,0,0,.2)!important;background:transparent!important
+  }
+  @page{size:A4;margin:0}
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:660px){
+  .sheet{width:100%!important}
+  .app-body{padding:32px 4%}
+  .doc-row{flex-wrap:wrap}
+  .form-cards{grid-template-columns:1fr}
+  .fg{grid-template-columns:1fr!important}
+  .fi.s2,.fi.s3{grid-column:auto!important}
+  .bottom-row{grid-template-columns:1fr}
+  .contract-opts{gap:3mm}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV (shared) ── -->
+<nav id="main-nav" style="display:none">
+  <div class="nav-in">
+    <a href="index.html" class="nav-logo">
+      <img src="Logo_migliorato.png" alt="Studio CDL Paolo Messina">
+    </a>
+    <div class="nav-right">
+      <span class="nav-user" id="nav-user-email"></span>
+      <button class="nav-logout" onclick="doLogout()">Esci</button>
+    </div>
+  </div>
+</nav>
+<div class="gold-rule" id="main-gold-rule" style="display:none"></div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1 — LOGIN
+═══════════════════════════════════════════ -->
+<div class="screen active" id="screen-login">
+  <div class="login-wrap">
+    <img class="login-logo" src="Logo_migliorato.png" alt="Studio CDL Paolo Messina">
+    <div class="login-eyebrow">
+      <div class="login-line"></div>
+      <div class="login-eye-text">Area Riservata Clienti</div>
+    </div>
+    <div class="login-title">Accesso<br>allo <em>studio.</em></div>
+    <div class="login-sub">Inserire le credenziali ricevute dallo studio.<br>Al primo accesso è consigliato modificare la password.</div>
+    <form class="lf" id="login-form" onsubmit="doLogin(event)">
+      <div class="lf-row">
+        <label for="li-email">Email</label>
+        <input type="email" id="li-email" placeholder="nome@azienda.it" required autocomplete="email">
+      </div>
+      <div class="lf-row">
+        <label for="li-pwd">Password</label>
+        <input type="password" id="li-pwd" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      <p class="login-msg" id="login-msg"></p>
+      <button type="submit" class="login-btn" id="login-btn">
+        Accedi <span class="login-arr">→</span>
+      </button>
+    </form>
+    <div class="login-footer">Studio CDL Paolo Messina · Paternò (CT) · P.IVA 05799860878</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2 — APP (dashboard)
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-app">
+  <div class="app-body">
+
+    <div class="page-hdr">
+      <div class="page-tag"><div class="page-tag-line"></div><div class="page-tag-text">Area Riservata</div></div>
+      <div class="page-title">Benvenuto nel tuo<br><em>spazio dedicato.</em></div>
+      <div class="page-sub">Documenti, moduli e impostazioni del tuo account.</div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab active" onclick="switchTab('documenti',this)">Documenti</div>
+      <div class="tab" onclick="switchTab('moduli',this)">Moduli</div>
+      <div class="tab" onclick="switchTab('account',this)">Account</div>
+    </div>
+
+    <!-- TAB: Documenti -->
+    <div class="tab-panel active" id="panel-documenti">
+      <div id="doc-list-wrap"></div>
+    </div>
+
+    <!-- TAB: Moduli -->
+    <div class="tab-panel" id="panel-moduli">
+      <div class="form-cards">
+        <div class="form-card" onclick="openForm('assunzione')">
+          <div class="form-card-bar"></div>
+          <div class="form-card-num">Mod. 01 — Uso Riservato Studio</div>
+          <div class="form-card-title">Scheda per Assunzione Dipendente</div>
+          <div class="form-card-desc">Compilare prima dell'assunzione di un nuovo dipendente. Inviare allo studio entro le ore 12:00 del 2° giorno lavorativo antecedente la data di inizio.</div>
+          <div class="form-card-cta">Compila modulo →</div>
+        </div>
+        <div class="form-card" style="opacity:.45;cursor:not-allowed">
+          <div class="form-card-bar"></div>
+          <div class="form-card-num">Mod. 02 — In arrivo</div>
+          <div class="form-card-title">Modulo Cessazione Rapporto</div>
+          <div class="form-card-desc">Prossimamente disponibile. Contattare lo studio per invii urgenti.</div>
+          <div class="form-card-cta" style="color:var(--muted)">In preparazione</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Account -->
+    <div class="tab-panel" id="panel-account">
+      <div class="pwd-section">
+        <div class="page-tag" style="margin-bottom:14px"><div class="page-tag-line"></div><div class="page-tag-text">Modifica Password</div></div>
+        <div class="pwd-note">La password deve essere modificata al primo accesso. Scegliere una password di almeno 8 caratteri non comunicata precedentemente.</div>
+        <form class="pwd-form" id="pwd-form" onsubmit="changePwd(event)">
+          <div class="pf-row">
+            <label for="pwd-new">Nuova Password</label>
+            <input type="password" id="pwd-new" minlength="8" required placeholder="min. 8 caratteri">
+          </div>
+          <div class="pf-row">
+            <label for="pwd-confirm">Conferma Password</label>
+            <input type="password" id="pwd-confirm" minlength="8" required placeholder="ripeti la password">
+          </div>
+          <p class="pwd-msg" id="pwd-msg"></p>
+          <button type="submit" class="pwd-btn" id="pwd-btn">
+            Aggiorna password <span style="color:var(--gold)">→</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 3 — MODULO ASSUNZIONE (compilabile)
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-form">
+
+  <div class="form-controls">
+    <button class="fc-back" onclick="closeForm()">← Torna ai Moduli</button>
+    <span class="fc-title" id="fc-title">Scheda Assunzione Dipendente</span>
+    <p class="fc-msg" id="fc-msg"></p>
+    <button class="fc-print" onclick="window.print()">Scarica PDF <span class="arr">↓</span></button>
+    <button class="fc-send" id="fc-send-btn" onclick="submitForm()">Invia allo Studio <span class="arr">→</span></button>
+  </div>
+
+  <div class="form-frame">
+  <div class="sheet" id="sheet-assunzione">
+
+    <div class="watermark"><img src="Logo_migliorato.png" alt=""></div>
+
+    <div class="hdr">
+      <img class="hdr-logo" src="Logo_migliorato.png" alt="Studio CDL Paolo Messina">
+      <div class="hdr-right">
+        <div class="hdr-name">Studio CDL Paolo Messina</div>
+        <div class="hdr-sub">Consulente del Lavoro · Relazioni Industriali &amp; HR</div>
+      </div>
+    </div>
+    <div class="gold-rule-doc"></div>
+
+    <div class="doc-title-bar">
+      <div class="doc-title">Scheda per Assunzione Dipendente</div>
+      <div class="doc-num">Mod. 01 — Uso Riservato Studio</div>
+    </div>
+
+    <div class="body">
+
+      <!-- Dati Azienda -->
+      <div class="sec-head"><div class="sec-head-line"></div><div class="sec-head-label">Dati Azienda</div></div>
+      <div class="fg">
+        <div class="fi s2">
+          <label for="f-azienda">Denominazione Azienda *</label>
+          <input type="text" id="f-azienda" name="azienda" placeholder="Ragione sociale" required>
+        </div>
+        <div class="fi s2">
+          <label for="f-sede">Sede di Lavoro *</label>
+          <input type="text" id="f-sede" name="sede" placeholder="Via, Città (Prov.)" required>
+        </div>
+      </div>
+
+      <!-- Dati Lavoratore -->
+      <div class="sec-head"><div class="sec-head-line"></div><div class="sec-head-label">Dati Lavoratore</div></div>
+      <div class="fg">
+        <div class="fi">
+          <label for="f-cognome-nome">Cognome e Nome *</label>
+          <input type="text" id="f-cognome-nome" name="cognome_nome" placeholder="Rossi Mario" required>
+        </div>
+        <div class="fi">
+          <label for="f-cf">Codice Fiscale *</label>
+          <input type="text" id="f-cf" name="codice_fiscale" placeholder="RSSMRA80A01F205X" maxlength="16" style="text-transform:uppercase" required>
+        </div>
+        <div class="fi">
+          <label for="f-qualifica">Qualifica</label>
+          <input type="text" id="f-qualifica" name="qualifica" placeholder="es. Operaio, Impiegato">
+        </div>
+        <div class="fi">
+          <label for="f-livello">Livello</label>
+          <input type="text" id="f-livello" name="livello" placeholder="es. 3° livello CCNL Commercio">
+        </div>
+        <div class="fi s2">
+          <label for="f-mansioni">Mansioni</label>
+          <input type="text" id="f-mansioni" name="mansioni" placeholder="Descrizione sintetica delle attività svolte">
+        </div>
+      </div>
+
+      <!-- Tipo Contratto -->
+      <div class="sec-head"><div class="sec-head-line"></div><div class="sec-head-label">Tipo Contratto</div></div>
+      <div class="contract-opts">
+        <div style="display:flex;gap:6mm;align-items:center;flex-wrap:wrap">
+          <div class="co">
+            <div class="co-top"><input type="checkbox" id="c-pieno" name="tempo_pieno"><label for="c-pieno">Tempo Pieno</label></div>
+          </div>
+          <div class="co">
+            <div class="co-top"><input type="checkbox" id="c-parziale" name="tempo_parziale"><label for="c-parziale">Tempo Parziale</label></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4mm;flex-wrap:wrap">
+          <div class="co">
+            <div class="co-top"><input type="checkbox" id="c-indet" name="indeterminato"><label for="c-indet">Tempo Indeterminato</label></div>
+            <div class="co-dates">
+              <label>Dal</label>
+              <input type="date" name="indet_dal" id="c-indet-dal">
+            </div>
+          </div>
+          <div class="co">
+            <div class="co-top"><input type="checkbox" id="c-det" name="determinato"><label for="c-det">Tempo Determinato</label></div>
+            <div class="co-dates">
+              <label>Dal</label>
+              <input type="date" name="det_dal" id="c-det-dal">
+              <label>Al</label>
+              <input type="date" name="det_al" id="c-det-al">
+            </div>
+          </div>
+          <div class="co">
+            <div class="co-top"><input type="checkbox" id="c-appr" name="apprendistato"><label for="c-appr">Apprendistato</label></div>
+            <div class="co-dates">
+              <label>Dal</label>
+              <input type="date" name="appr_dal" id="c-appr-dal">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orario di Lavoro -->
+      <div class="sec-head"><div class="sec-head-line"></div><div class="sec-head-label">Orario di Lavoro</div></div>
+      <table class="sched">
+        <thead>
+          <tr>
+            <th>Giorno</th>
+            <th>Mattina — Dalle</th>
+            <th>Alle</th>
+            <th>Pomeriggio — Dalle</th>
+            <th>Alle</th>
+            <th>Ore</th>
+          </tr>
+        </thead>
+        <tbody id="sched-body"></tbody>
+        <tfoot>
+          <tr class="tot">
+            <td colspan="5">Totale Ore Settimanali</td>
+            <td><input type="number" name="ore_totali" id="ore-totali" min="0" max="48" step="0.5" style="width:28px;text-align:center"></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- Retribuzione -->
+      <div class="sec-head"><div class="sec-head-line"></div><div class="sec-head-label">Condizioni Retributive (importi lordi €/mese)</div></div>
+      <table class="retrib">
+        <thead>
+          <tr><th>Voce</th><th>Importo (€)</th><th>Note</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Stipendio Contrattuale</td>
+            <td><input type="number" name="stipendio" min="0" step="0.01" placeholder="0,00"></td>
+            <td><input type="text" name="stipendio_note" placeholder=""></td>
+          </tr>
+          <tr>
+            <td>Superminimo</td>
+            <td><input type="number" name="superminimo" min="0" step="0.01" placeholder="0,00"></td>
+            <td><input type="text" name="superminimo_note" placeholder=""></td>
+          </tr>
+          <tr>
+            <td>Altre Voci</td>
+            <td><input type="number" name="altre_voci" min="0" step="0.01" placeholder="0,00"></td>
+            <td><input type="text" name="altre_note" placeholder="specificare"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Note -->
+      <div class="sec-head"><div class="sec-head-line"></div><div class="sec-head-label">Note Particolari</div></div>
+      <div class="fi">
+        <textarea name="note" id="f-note" placeholder="Indicare eventuali condizioni particolari, deroghe contrattuali, accordi specifici…" rows="3"></textarea>
+      </div>
+
+      <!-- Istruzioni invio -->
+      <div class="send-box">
+        <div class="send-title">Istruzioni per l'Invio</div>
+        <div class="send-text">
+          Il presente modulo deve pervenire allo Studio entro le ore <strong>12:00 del 2° giorno lavorativo</strong> antecedente la data di assunzione,
+          a mezzo e-mail all'indirizzo <span class="send-email">segreteria@cdlmessina.it</span>, unitamente alla documentazione richiesta.
+        </div>
+      </div>
+
+      <!-- Allegati & Firma -->
+      <div class="bottom-row">
+        <div>
+          <div class="sec-head" style="margin-top:0"><div class="sec-head-line"></div><div class="sec-head-label">Allegati Richiesti</div></div>
+          <div class="alleg-list">
+            <div class="alleg-item"><input type="checkbox" name="all_doc" id="all-doc"><label for="all-doc">Documento d'Identità (fronte/retro)</label></div>
+            <div class="alleg-item"><input type="checkbox" name="all_cf" id="all-cf"><label for="all-cf">Codice Fiscale</label></div>
+            <div class="alleg-item"><input type="checkbox" name="all_pds" id="all-pds"><label for="all-pds">Permesso di Soggiorno (solo extra-UE)</label></div>
+          </div>
+        </div>
+        <div>
+          <div class="sec-head" style="margin-top:0"><div class="sec-head-line"></div><div class="sec-head-label">Firme</div></div>
+          <div class="sign-fields">
+            <div class="sign-field">
+              <div class="sign-lbl">Data</div>
+              <input class="sign-input" type="date" name="data_firma" id="f-data-firma">
+            </div>
+            <div class="sign-field">
+              <div class="sign-lbl">Firma Datore di Lavoro</div>
+              <input class="sign-input" type="text" name="firma_datore" placeholder="Cognome Nome">
+            </div>
+            <div class="sign-field">
+              <div class="sign-lbl">Firma Lavoratore</div>
+              <input class="sign-input" type="text" name="firma_lavoratore" placeholder="Cognome Nome">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /body -->
+
+    <div class="ftr">
+      <div class="ftr-left">Studio CDL Paolo Messina · Via Somalia n.6, 95047 Paternò (CT)<br>segreteria@cdlmessina.it · +39 392 60 24 447 · www.cdlmessina.it</div>
+      <div class="ftr-right">Albo CDL n. 789<br>P.IVA 05799860878</div>
+    </div>
+
+  </div><!-- /sheet -->
+  </div><!-- /form-frame -->
+</div><!-- /screen-form -->
+
+<script>
+/* ══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let currentUser = null;
+
+// Build schedule table
+(function buildSched(){
+  const days = ['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
+  const tbody = document.getElementById('sched-body');
+  days.forEach(d => {
+    tbody.innerHTML += `<tr>
+      <td>${d}</td>
+      <td><input type="time" name="m_dalle_${d}" style="width:52px"></td>
+      <td><input type="time" name="m_alle_${d}" style="width:52px"></td>
+      <td><input type="time" name="p_dalle_${d}" style="width:52px"></td>
+      <td><input type="time" name="p_alle_${d}" style="width:52px"></td>
+      <td><input type="number" name="ore_${d}" min="0" max="12" step="0.5" style="width:32px;text-align:center"></td>
+    </tr>`;
+  });
+})();
+
+// Set today's date on the form
+document.getElementById('f-data-firma').value = new Date().toISOString().split('T')[0];
+
+/* ══════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════ */
+sb.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    currentUser = session.user;
+    showApp(session.user);
+  } else {
+    currentUser = null;
+    showLogin();
+  }
+});
+
+async function doLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const msg = document.getElementById('login-msg');
+  btn.disabled = true;
+  btn.textContent = 'Accesso in corso…';
+  msg.textContent = '';
+  const { error } = await sb.auth.signInWithPassword({
+    email: document.getElementById('li-email').value.trim(),
+    password: document.getElementById('li-pwd').value
+  });
+  if (error) {
+    msg.textContent = 'Credenziali non valide. Contattare lo studio.';
+    btn.disabled = false;
+    btn.innerHTML = 'Accedi <span class="login-arr">→</span>';
+  }
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+}
+
+/* ══════════════════════════════════════════════
+   SCREEN MANAGEMENT
+═══════════════════════════════════════════════ */
+function showLogin() {
+  document.getElementById('screen-login').classList.add('active');
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-form').classList.remove('active');
+  document.getElementById('main-nav').style.display = 'none';
+  document.getElementById('main-gold-rule').style.display = 'none';
+}
+
+function showApp(user) {
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  document.getElementById('screen-form').classList.remove('active');
+  document.getElementById('main-nav').style.display = '';
+  document.getElementById('main-gold-rule').style.display = '';
+  document.getElementById('nav-user-email').textContent = user.email;
+  renderDocuments();
+}
+
+function openForm(formId) {
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-form').classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function closeForm() {
+  document.getElementById('screen-form').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  switchTab('moduli', document.querySelector('.tab:nth-child(2)'));
+  window.scrollTo(0, 0);
+}
+
+/* ══════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════ */
+function switchTab(panelId, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + panelId).classList.add('active');
+}
+
+/* ══════════════════════════════════════════════
+   DOCUMENTS
+═══════════════════════════════════════════════ */
+function renderDocuments() {
+  const wrap = document.getElementById('doc-list-wrap');
+  if (!DOCUMENTI.length) {
+    wrap.innerHTML = '<div class="doc-empty">Nessun documento disponibile al momento.<br>Lo studio provvederà a caricare i documenti di sua competenza.</div>';
+    return;
+  }
+  wrap.innerHTML = '<div class="doc-grid">' + DOCUMENTI.map(doc => `
+    <div class="doc-row">
+      <div class="doc-icon">PDF</div>
+      <div class="doc-info">
+        <div class="doc-name">${doc.nome}</div>
+        <div class="doc-meta">
+          <span>${formatDate(doc.data)}</span>
+          <span class="doc-tag">${doc.tag}</span>
+        </div>
+      </div>
+      <a class="doc-dl" onclick="downloadDoc('${doc.file}')">Scarica <span class="arr">↓</span></a>
+    </div>`).join('') + '</div>';
+}
+
+async function downloadDoc(filename) {
+  const { data, error } = await sb.storage.from('documenti').createSignedUrl(filename, 60);
+  if (error) { alert('Documento non disponibile. Contattare lo studio.'); return; }
+  window.open(data.signedUrl, '_blank');
+}
+
+function formatDate(d) {
+  const dt = new Date(d);
+  return dt.toLocaleDateString('it-IT', { day:'2-digit', month:'long', year:'numeric' });
+}
+
+/* ══════════════════════════════════════════════
+   FORM SUBMIT
+═══════════════════════════════════════════════ */
+async function submitForm() {
+  const btn = document.getElementById('fc-send-btn');
+  const msgEl = document.getElementById('fc-msg');
+  
+  // Basic validation
+  const req = ['f-azienda','f-sede','f-cognome-nome','f-cf'];
+  let valid = true;
+  req.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.style.borderColor='var(--err)'; valid = false; }
+    else { el.style.borderColor=''; }
+  });
+  if (!valid) {
+    msgEl.textContent = 'Compilare i campi obbligatori (*)';
+    msgEl.className = 'fc-msg show err';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = 'Invio… <span class="arr">↻</span>';
+  msgEl.className = 'fc-msg';
+
+  // Collect form data
+  const sheet = document.getElementById('sheet-assunzione');
+  const inputs = sheet.querySelectorAll('input,select,textarea');
+  const payload = { submitted_by: currentUser.email, submitted_at: new Date().toISOString() };
+  inputs.forEach(inp => {
+    if (!inp.name) return;
+    payload[inp.name] = inp.type === 'checkbox' ? inp.checked : inp.value;
+  });
+
+  const { error } = await sb.from('moduli_assunzione').insert([payload]);
+
+  if (error) {
+    msgEl.textContent = '✗ Errore invio. Inviare per email a segreteria@cdlmessina.it';
+    msgEl.className = 'fc-msg show err';
+  } else {
+    msgEl.textContent = '✓ Modulo inviato correttamente. Lo studio lo riceverà entro breve.';
+    msgEl.className = 'fc-msg show';
+  }
+  btn.disabled = false;
+  btn.innerHTML = 'Invia allo Studio <span class="arr">→</span>';
+}
+
+/* ══════════════════════════════════════════════
+   CHANGE PASSWORD
+═══════════════════════════════════════════════ */
+async function changePwd(e) {
+  e.preventDefault();
+  const btn = document.getElementById('pwd-btn');
+  const msg = document.getElementById('pwd-msg');
+  const np = document.getElementById('pwd-new').value;
+  const cp = document.getElementById('pwd-confirm').value;
+  if (np !== cp) {
+    msg.textContent = '✗ Le password non coincidono.';
+    msg.className = 'pwd-msg err';
+    return;
+  }
+  btn.disabled = true;
+  msg.textContent = '';
+  const { error } = await sb.auth.updateUser({ password: np });
+  if (error) {
+    msg.textContent = '✗ Errore aggiornamento. Riprovare.';
+    msg.className = 'pwd-msg err';
+  } else {
+    msg.textContent = '✓ Password aggiornata con successo.';
+    msg.className = 'pwd-msg ok';
+    document.getElementById('pwd-form').reset();
+  }
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
