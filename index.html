@@ -97,7 +97,7 @@
       "@id": "https://www.cdlmessina.it/#persona",
       "name": "Paolo Messina",
       "jobTitle": "Consulente del Lavoro",
-      "description": "Consulente del Lavoro iscritto all'Albo, esperto in relazioni industriali e gestione delle risorse umane. Labours Relation Specialist presso il Gruppo GPI S.p.A.",
+      "description": "Consulente del Lavoro iscritto all'Albo, esperto in relazioni industriali e gestione delle risorse umane. Labour Relations Specialist presso il Gruppo GPI S.p.A.",
       "worksFor": [
         {"@type": "Organization", "name": "Studio CDL Paolo Messina"},
         {"@type": "Organization", "name": "Gruppo GPI S.p.A."}
@@ -216,9 +216,10 @@ nav{background:var(--navy)}
 .hero{background:var(--navy);padding-top:var(--nav-h);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-left:5%;padding-right:5%;padding-bottom:60px;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(30,109,181,.12),transparent);pointer-events:none}
 .hero-watermark{position:absolute;right:-2%;bottom:-5%;font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(180px,28vw,380px);color:rgba(255,255,255,.022);font-weight:600;line-height:1;pointer-events:none;user-select:none;font-style:italic}
-.eyebrow{display:inline-flex;align-items:center;gap:12px;margin-bottom:40px}
+.eyebrow{display:inline-flex;align-items:center;gap:12px;margin-bottom:24px}
 .eyebrow-line{width:28px;height:1px;background:var(--gold)}
 .eyebrow-text{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:500}
+.hero-studio{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(20px,2.5vw,32px);color:rgba(255,255,255,.78);letter-spacing:.04em;margin-bottom:20px;font-weight:400}
 .hero h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(42px,6.5vw,80px);font-weight:400;color:#fff;line-height:1.08;max-width:720px;margin-bottom:22px}
 .hero h1 em{color:var(--gold);font-style:italic}
 .hero-sub{font-size:14px;color:rgba(255,255,255,.42);max-width:460px;line-height:1.85;margin-bottom:64px}
@@ -386,7 +387,7 @@ footer{background:var(--navy);padding:40px 5%;border-top:1px solid rgba(184,150,
   <nav aria-label="Navigazione principale">
     <div class="nav-in">
       <a class="nav-logo" href="#hero" aria-label="Torna alla homepage">
-        <img src="Logo_migliorato.png" alt="Studio CDL Paolo Messina — Consulente del Lavoro" width="136" height="34">
+        <img src="Logo_transparent.png" alt="Studio CDL Paolo Messina — Consulente del Lavoro" width="136" height="34">
       </a>
       <div class="nav-links">
         <a href="#aziende">Aziende</a>
@@ -416,11 +417,12 @@ footer{background:var(--navy);padding:40px 5%;border-top:1px solid rgba(184,150,
   <div class="hero-watermark" aria-hidden="true">PM</div>
   <div class="eyebrow reveal">
     <div class="eyebrow-line" aria-hidden="true"></div>
-    <span class="eyebrow-text">Studio di Consulenza del Lavoro · Paternò</span>
+    <span class="eyebrow-text">Consulente del Lavoro · Paternò (CT)</span>
   </div>
-  <h1 class="reveal d1">Consulenza del lavoro<br>nuova. Aggiornata.<br><em>Su misura.</em></h1>
-  <p class="hero-sub reveal d2">Competenza maturata nelle grandi imprese, al servizio di aziende e lavoratori. Perché ogni situazione merita un approccio costruito su di essa.</p>
-  <div class="hero-cards reveal d3">
+  <p class="hero-studio reveal d1">Studio CDL Paolo Messina</p>
+  <h1 class="reveal d2">Consulenza del lavoro<br>nuova. Aggiornata.<br><em>Su misura.</em></h1>
+  <p class="hero-sub reveal d3">Competenza maturata nelle grandi imprese, al servizio di aziende e lavoratori. Perché ogni situazione merita un approccio costruito su di essa.</p>
+  <div class="hero-cards reveal d4">
     <a href="#aziende" class="hcard">
       <div class="hcard-bar" aria-hidden="true"></div>
       <h3>Sono un'Azienda</h3>
@@ -586,11 +588,7 @@ footer{background:var(--navy);padding:40px 5%;border-top:1px solid rgba(184,150,
   <div class="chi-grid">
     <div>
       <div class="chi-photo reveal">
-        <svg class="chi-photo-icon" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <circle cx="20" cy="14" r="7" stroke="#6b6b6a" stroke-width="1.5"/>
-          <path d="M6 36c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#6b6b6a" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-        <span>Foto Profilo</span>
+        <img src="Paolo_Messina.png" alt="Paolo Messina — Consulente del Lavoro, Studio CDL Messina" style="width:100%;height:100%;object-fit:cover;object-position:center top">
       </div>
     </div>
     <div class="chi-content reveal d2">
@@ -604,7 +602,7 @@ footer{background:var(--navy);padding:40px 5%;border-top:1px solid rgba(184,150,
       <p class="chi-bio">
         Paolo Messina è <strong>Consulente del Lavoro iscritto all'Albo</strong> con una specializzazione nelle relazioni industriali e nella gestione delle risorse umane maturata in contesti aziendali di respiro internazionale.
         <br><br>
-        Dal 2016 opera come <strong>Labours Relation Specialist presso il Gruppo GPI S.p.A.</strong>, realtà multinazionale leader nel settore, dove si occupa di gestione, supporto e sviluppo del personale: dall'amministrazione delle presenze e delle paghe alla gestione dei fondi previdenziali e assistenziali, fino agli adempimenti con gli enti previdenziali.
+        Dal 2016 opera come <strong>Labour Relations Specialist presso il Gruppo GPI S.p.A.</strong>, realtà multinazionale leader nel settore, dove si occupa di gestione, supporto e sviluppo del personale: dall'amministrazione delle presenze e delle paghe alla gestione dei fondi previdenziali e assistenziali, fino agli adempimenti con gli enti previdenziali.
         <br><br>
         Dal 2021, affianca a questa esperienza l'attività autonoma con lo <strong>Studio CDL Paolo Messina</strong>, portando alle PMI e alle aziende del territorio la competenza operativa sviluppata in grandi strutture organizzative: dalla contrattazione di secondo livello alla gestione completa dell'ufficio HR in outsourcing.
       </p>
@@ -796,7 +794,7 @@ footer{background:var(--navy);padding:40px 5%;border-top:1px solid rgba(184,150,
   <div class="footer-top">
     <div>
       <div class="footer-logo">
-        <img src="Logo_migliorato.png" alt="Studio CDL Paolo Messina" width="120" height="30">
+        <img src="Logo_transparent.png" alt="Studio CDL Paolo Messina" width="120" height="30">
       </div>
       <p class="footer-tagline">Studio di Consulenza del Lavoro<br>Via Somalia n.6 · 95047 Paternò (CT)</p>
     </div>

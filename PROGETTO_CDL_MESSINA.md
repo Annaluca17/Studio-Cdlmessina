@@ -17,7 +17,7 @@
 | **P.IVA** | 05799860878 |
 | **Albo CDL** | n. 789 |
 | **Sito live** | https://www.cdlmessina.it |
-| **Staging Vercel** | https://studio-cdlmessina.vercel.app |
+| **Staging Vercel** | https://studio-cdlmessina-ftdb.vercel.app |
 | **Repository GitHub** | https://github.com/Annaluca17/Studio-Cdlmessina |
 
 ---
@@ -91,7 +91,7 @@ Padding interno card: 36px 30px
 /* Reveal on scroll — classe .reveal + .on aggiunta da IntersectionObserver */
 .reveal { opacity:0; transform:translateY(20px); transition:opacity .65s ease,transform .65s ease }
 .reveal.on { opacity:1; transform:none }
-/* Delay stagger */
+/* Delay stagger — hero usa d1→d4, sezioni usano d1→d3 */
 .d1 { transition-delay:.1s } .d2 { transition-delay:.2s }
 .d3 { transition-delay:.3s } .d4 { transition-delay:.4s }
 ```
@@ -102,15 +102,23 @@ Padding interno card: 36px 30px
 
 ```
 Studio-Cdlmessina/
-├── index.html              ✅ LIVE — sito principale (ristrutturato 2026-05-09)
+├── index.html              ✅ LIVE — sito principale (aggiornato 2026-05-09)
 ├── area-riservata.html     ✅ LIVE — portale clienti
-├── Logo_migliorato.png     ✅ LIVE — logo principale (sfondo bianco)
+├── Logo_migliorato.png     ✅ LIVE — logo originale (sfondo bianco, usato come favicon/OG)
+├── Logo_transparent.png    ✅ LIVE — logo con sfondo trasparente (nav + footer)
+├── Paolo_Messina.png       ✅ LIVE — foto profilo Paolo Messina (sezione #chi-sono)
 ├── robots.txt              ✅ LIVE
 ├── sitemap.xml             ✅ LIVE
 ├── PROGETTO_CDL_MESSINA.md ✅ Project brief
 ├── privacy-policy.html     ✅ LIVE — informativa GDPR (creata 2026-05-09)
 └── cookie-policy.html      ✅ LIVE — informativa cookie (creata 2026-05-09)
 ```
+
+> **NOTA LOGO:** esistono due versioni del logo.
+> - `Logo_migliorato.png` — sfondo bianco, usato per favicon, OG image, meta tag
+> - `Logo_transparent.png` — sfondo trasparente, usato in `<nav>` e `<footer>` con CSS `filter:brightness(0) invert(1)` che lo rende bianco su sfondo navy
+>
+> **Non usare `Logo_migliorato.png` nella navbar/footer**: il filtro CSS renderebbe tutto bianco (logo invisibile).
 
 ---
 
@@ -123,14 +131,36 @@ SPA con **sezioni ancora** (`#hero`, `#aziende`, `#privati`, `#chi-sono`, `#faq`
 > Versione precedente usava JS con `showView()` — quella è obsoleta, non usarla.
 
 ### Sezioni in ordine
-1. **Hero** — headline `"Consulenza del lavoro nuova. Aggiornata. Su misura."` + 2 card (Aziende / Privati)
+1. **Hero** — eyebrow + nome studio + headline + sottotitolo + 2 card (Aziende / Privati)
 2. **Servizi Aziende** (`#aziende`) — 3 card featured + 3 standard
 3. **Strip Metriche Aziende** — navy, 100% / 24h / 360°
 4. **Servizi Privati** (`#privati`) — 4 card (Conciliazione / CTP / Riconteggio / Previdenza)
 5. **Strip Metriche Privati** — navy, 24h / 10+
-6. **Chi Sono** (`#chi-sono`) — placeholder foto + bio Paolo Messina + tag competenze
+6. **Chi Sono** (`#chi-sono`) — foto Paolo Messina + bio + tag competenze
 7. **FAQ** (`#faq`) — accordion 5 domande
 8. **Contatti** (`#contatti`) — info studio + form Formspree
+
+### Hero — Struttura Elemento per Elemento
+```html
+<!-- Ordine esatto degli elementi nel hero, con relative classi reveal/delay -->
+<div class="eyebrow reveal">          <!-- "Consulente del Lavoro · Paternò (CT)" -->
+<p class="hero-studio reveal d1">     <!-- "Studio CDL Paolo Messina" — Cormorant Garamond -->
+<h1 class="reveal d2">               <!-- Headline principale -->
+<p class="hero-sub reveal d3">        <!-- Sottotitolo -->
+<div class="hero-cards reveal d4">    <!-- 2 card Aziende / Privati -->
+```
+
+### CSS — Classe hero-studio
+```css
+.hero-studio {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: clamp(20px, 2.5vw, 32px);
+  color: rgba(255,255,255,.78);
+  letter-spacing: .04em;
+  margin-bottom: 20px;
+  font-weight: 400;
+}
+```
 
 ### Form Contatti
 ```
@@ -150,9 +180,8 @@ Campi:      nome, cognome, email, telefono, tipo (select), dipendenti (condizion
 
 ### JS — Funzioni Chiave
 ```javascript
-// ⚠️ NAMING CRITICO: NON usare "scrollTo" come nome funzione
+// ⚠️ NAMING CRITICO: NON usare "scrollTo" come nome funzione custom
 // (conflitto con window.scrollTo nativo del browser)
-// La versione corrente usa anchor href="#id" — non c'è JS di scroll
 
 revealObs      // IntersectionObserver per animazioni reveal
 navObs         // IntersectionObserver per active state nella navbar
@@ -187,9 +216,9 @@ const SUPABASE_ANON = 'eyXXX...'; // anon key da Settings → API
 **URL Configuration su Supabase (già fatto o da fare):**
 ```
 Authentication → URL Configuration
-Site URL:      https://studio-cdlmessina.vercel.app
+Site URL:      https://studio-cdlmessina-ftdb.vercel.app
                (aggiornare a https://www.cdlmessina.it quando dominio attivo)
-Redirect URLs: https://studio-cdlmessina.vercel.app/area-riservata.html
+Redirect URLs: https://studio-cdlmessina-ftdb.vercel.app/area-riservata.html
                https://www.cdlmessina.it/area-riservata.html
 ```
 
@@ -283,9 +312,12 @@ Esperienza 2:
 Tag competenze: Relazioni Industriali, HR Outsourcing, Payroll & Contributi,
                 Contrattazione Collettiva, Fondi Previdenziali, Welfare Aziendale
 
-Foto profilo: MANCANTE — placeholder SVG presente
-              Quando disponibile: <img src="foto-profilo.jpg" style="width:100%;height:100%;object-fit:cover">
-              Da inserire dentro .chi-photo al posto del placeholder SVG
+Foto profilo: ✅ ATTIVA — file Paolo_Messina.png nel repo
+              Implementazione nel DOM:
+              <img src="Paolo_Messina.png"
+                   alt="Paolo Messina — Consulente del Lavoro"
+                   style="width:100%;height:100%;object-fit:cover;object-position:center top">
+              Contenuto dentro .chi-photo (aspect-ratio 3/4 desktop, 4/3 mobile)
 ```
 
 ---
@@ -314,16 +346,14 @@ Foto profilo: MANCANTE — placeholder SVG presente
 
 ## 9. Moduli HTML (Design System)
 
-Presenti nel repository ZIP `Studio_CDL_Messina_Design_System.zip`:
-
 | File | Descrizione | Stato |
 |---|---|---|
-| `Modulo Assunzione.html` | Template A4 stampabile — Scheda per Assunzione Dipendente | ✅ Convertito in form interattivo in area-riservata.html |
-| `Adempimenti Sicurezza.html` | Template A4 landscape — tabella adempimenti D.Lgs. 81/08 | ❌ Da convertire in form interattivo (fase 2) |
+| `Modulo Assunzione.html` | Template A4 stampabile | ✅ Convertito in form interattivo in area-riservata.html |
+| `Adempimenti Sicurezza.html` | Template A4 landscape — D.Lgs. 81/08 | ❌ Da convertire (fase 2) |
 | `Carta Intestata.html` | Template carta intestata studio | Documentale |
 | `Email Signature.html` | Firma email | Documentale |
 
-**Font documenti:** Quattrocento Sans (presente in `/fonts/`) — usato solo nei template A4, non nel sito web.
+**Font documenti:** Quattrocento Sans — usato solo nei template A4, non nel sito web.
 
 ---
 
@@ -332,20 +362,22 @@ Presenti nel repository ZIP `Studio_CDL_Messina_Design_System.zip`:
 ### 🔴 Critico (P0)
 - [x] **privacy-policy.html** — ✅ creata e deployata (2026-05-09)
 - [x] **cookie-policy.html** — ✅ creata e deployata (2026-05-09)
+- [x] **Logo visibile in navbar** — ✅ risolto con Logo_transparent.png (2026-05-09)
+- [x] **Foto profilo Paolo Messina** — ✅ Paolo_Messina.png attivo in #chi-sono (2026-05-09)
+- [x] **Nome Studio visibile nel hero** — ✅ aggiunto elemento .hero-studio (2026-05-09)
 - [ ] **Supabase ANON KEY** — verificare che sia incollata correttamente in area-riservata.html
-- [ ] **Redirect URL Supabase** — impostare a `https://www.cdlmessina.it/area-riservata.html` quando dominio attivo
+- [ ] **Redirect URL Supabase** — aggiornare a `https://www.cdlmessina.it/area-riservata.html` quando dominio attivo
 
 ### 🟡 Importante (P1)
-- [ ] **Foto profilo Paolo Messina** — caricare `foto-profilo.jpg` nel repo e sostituire placeholder SVG in `#chi-sono`
-- [x] **Collegamento Area Riservata** — ✅ link aggiunto nel footer di index.html (2026-05-09)
+- [x] **Collegamento Area Riservata** — ✅ link nel footer di index.html (2026-05-09)
 - [ ] **Dominio cdlmessina.it** — configurare DNS su Vercel (Settings → Domains)
-- [ ] **Notifiche email** — Supabase Database Webhooks → trigger su insert in `moduli_assunzione` → POST a Formspree o Resend
+- [ ] **Notifiche email** — Supabase Webhooks → trigger su insert `moduli_assunzione` → POST a Formspree/Resend
 
 ### 🟢 Fase 2
-- [ ] **Adempimenti Sicurezza** — convertire template A4 in form compilabile (stesso pattern di Modulo Assunzione)
+- [ ] **Adempimenti Sicurezza** — convertire template A4 in form compilabile
 - [ ] **Upload documenti dal cliente** — Storage bucket "uploads-clienti" con RLS per-utente
-- [ ] **Pannello admin** — pagina `admin.html` protetta per Paolo: visualizza moduli ricevuti, carica documenti, gestisce clienti senza accedere a Supabase Dashboard
-- [ ] **Notifiche** — email automatica al cliente quando Paolo carica un nuovo documento
+- [ ] **Pannello admin** — `admin.html` protetta: visualizza moduli, carica documenti, gestisce clienti
+- [ ] **Notifiche cliente** — email automatica quando Paolo carica nuovo documento
 
 ---
 
@@ -353,8 +385,7 @@ Presenti nel repository ZIP `Studio_CDL_Messina_Design_System.zip`:
 
 ### Come deployare una modifica
 ```bash
-# Il deploy è automatico: qualsiasi push al branch main di GitHub
-# viene rilevato da Vercel e pubblicato in ~60 secondi
+# Deploy automatico: push al branch main → Vercel pubblica in ~60 secondi
 git add .
 git commit -m "descrizione modifica"
 git push origin main
@@ -363,14 +394,13 @@ git push origin main
 ### Dove mettere i file
 ```
 Tutti i file HTML, CSS, JS, PNG → root del repository (stessa cartella di index.html)
-Nessuna sottocartella necessaria (sito è flat, no build step)
+Nessuna sottocartella (sito flat, no build step)
 ```
 
 ### Naming critico — errori da evitare
 ```javascript
 // ❌ MAI usare "scrollTo" come nome di funzione custom
-// (sovrascrive window.scrollTo e rompe la navigazione)
-function scrollTo(id) { ... }    // SBAGLIATO
+function scrollTo(id) { ... }    // SBAGLIATO — sovrascrive window.scrollTo
 
 // ✅ Usare nome diverso
 function scrollToSection(id) { ... }    // CORRETTO
@@ -378,28 +408,23 @@ function scrollToSection(id) { ... }    // CORRETTO
 
 ### Pattern Supabase nell'area riservata
 ```javascript
-// Init client (già presente nel file)
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// Auth listener (gestisce login/logout automaticamente)
 sb.auth.onAuthStateChange((event, session) => { ... });
 
-// Download documento con URL firmato
+// Signed URL per download documento
 const { data } = await sb.storage.from('documenti').createSignedUrl(filename, 60);
 window.open(data.signedUrl, '_blank');
 
-// Invio modulo a database
 await sb.from('moduli_assunzione').insert([payload]);
-
-// Cambio password
 await sb.auth.updateUser({ password: nuovaPassword });
 ```
 
 ### Aggiungere un nuovo documento scaricabile
 1. Caricare il PDF in Supabase Storage → bucket `documenti`
 2. In `area-riservata.html`, trovare l'array `DOCUMENTI` (prime righe del `<script>`)
-3. Aggiungere una riga:
+3. Aggiungere riga:
 ```javascript
 { nome: 'Titolo documento', file: 'nome-file.pdf', data: 'YYYY-MM-DD', tag: 'Categoria' }
 ```
@@ -407,10 +432,9 @@ await sb.auth.updateUser({ password: nuovaPassword });
 ### Aggiungere un nuovo cliente
 ```
 Supabase Dashboard → Authentication → Users → Invite user
-→ Inserire email del cliente
-→ Supabase invia email con link (il link punta a Redirect URL configurato)
-→ Cliente imposta la password
-→ Dal login successivo può usare email + password
+→ Email cliente → Supabase invia link
+→ Cliente imposta password
+→ Login successivo: email + password
 ```
 
 ---
@@ -419,12 +443,12 @@ Supabase Dashboard → Authentication → Users → Invite user
 
 | Decisione | Alternativa scartata | Motivazione |
 |---|---|---|
-| Vanilla JS (no React/Vue) | React, Next.js | Zero build step, deploy immediato su GitHub Pages/Vercel, profilo no-code del gestore |
-| Supabase | Firebase, Memberstack | Free tier generoso per 50 utenti, dashboard visuale per admin, Storage integrato, JS client CDN |
-| Formspree per form pubblico | EmailJS, backend custom | Zero configurazione, free fino 50 msg/mese, filtro spam incluso |
-| SPA con anchor link | SPA con JS show/hide | SEO superiore (sezioni indicizzabili), URL condivisibili, nessun bug di naming function |
-| File flat nel repo root | Sottocartelle src/ | Compatibile con Vercel senza configurazione, semplicità per gestore no-code |
-| Vercel | GitHub Pages, Netlify | Già configurato, supporta serverless functions per future espansioni, deploy automatico |
+| Vanilla JS (no React/Vue) | React, Next.js | Zero build step, profilo no-code del gestore |
+| Supabase | Firebase, Memberstack | Free tier 50 utenti, dashboard visuale, Storage integrato |
+| Formspree per form pubblico | EmailJS, backend custom | Zero configurazione, free 50 msg/mese |
+| SPA con anchor link | SPA con JS show/hide | SEO superiore, URL condivisibili, no bug naming |
+| File flat nel repo root | Sottocartelle src/ | Compatibile Vercel senza config, semplicità no-code |
+| Logo doppio (bianco + trasparente) | Logo unico | PNG bianco usato per OG/favicon; trasparente per nav/footer con filter CSS |
 
 ---
 
@@ -438,4 +462,99 @@ Supabase Dashboard → Authentication → Users → Invite user
 
 ---
 
-*Documento aggiornato in data 2026-05-09. Nome repository corretto: Studio-Cdlmessina. Aggiornare a ogni milestone completata.*
+## 14. Prompt di Verifica Post-Deploy e Istruzioni GitHub
+
+### 14a. File da caricare su GitHub dopo ogni sessione di lavoro
+
+Aprire il repository https://github.com/Annaluca17/Studio-Cdlmessina e, nella root, caricare/sostituire i file elencati nella tabella seguente. Per ciascun file: clicca sul nome del file esistente → matita (Edit) → oppure trascina il nuovo file nella root se è un file nuovo.
+
+**Sessione 2026-05-09 — file da caricare:**
+
+| File | Azione | Note |
+|---|---|---|
+| `index.html` | **Sostituire** | Aggiornato: hero-studio, logo trasparente, foto Paolo |
+| `Logo_transparent.png` | **Aggiungere** (nuovo) | Logo con sfondo trasparente per nav/footer |
+| `Paolo_Messina.png` | **Aggiungere** (nuovo) | Foto profilo sezione Chi Sono |
+| `PROGETTO_CDL_MESSINA.md` | **Sostituire** | Project brief aggiornato |
+
+> Dopo l'upload fare commit su `main`. Vercel rileva il push e pubblica in ~60 secondi.  
+> Verificare il deploy su: https://studio-cdlmessina-ftdb.vercel.app
+
+---
+
+### 14b. Prompt di Verifica — da incollare a Claude nella sessione successiva
+
+Usa questo prompt all'inizio della prossima sessione per far verificare a Claude lo stato del sito live prima di procedere con nuove modifiche.
+
+---
+
+```
+Leggi il file PROGETTO_CDL_MESSINA.md allegato a questo progetto prima di fare qualsiasi cosa.
+
+Devi verificare lo stato attuale del sito live e confermare che le ultime modifiche deployate siano operative. Il sito è raggiungibile a: https://studio-cdlmessina-ftdb.vercel.app
+
+Esegui le seguenti verifiche in sequenza usando gli strumenti a disposizione (Vercel MCP o web fetch):
+
+**CHECKLIST DI VERIFICA — Sessione 2026-05-09**
+
+1. LOGO NAVBAR
+   - Controlla che nella `<nav>` il tag `<img>` punti a `Logo_transparent.png` (NON a `Logo_migliorato.png`)
+   - Controlla che il CSS `.nav-logo img` abbia `filter:brightness(0) invert(1)`
+   - Stato atteso: logo bianco visibile su sfondo navy
+
+2. LOGO FOOTER
+   - Controlla che nel `<footer>` il tag `<img>` punti a `Logo_transparent.png`
+   - Stato atteso: logo bianco visibile su sfondo navy
+
+3. HERO — NOME STUDIO
+   - Controlla che nel `<section class="hero">` esista l'elemento `<p class="hero-studio reveal d1">Studio CDL Paolo Messina</p>`
+   - Controlla che nel CSS esista la classe `.hero-studio` con `font-family: Cormorant Garamond`
+   - Controlla che l'eyebrow dica "Consulente del Lavoro · Paternò (CT)" (NON "Studio di Consulenza del Lavoro · Paternò")
+   - Stato atteso: nome studio visibile nel hero sopra il titolo principale
+
+4. FOTO PROFILO
+   - Controlla che nella sezione `#chi-sono` dentro `.chi-photo` ci sia un `<img src="Paolo_Messina.png" ...>`
+   - Controlla che NON ci sia più il placeholder SVG (circle + path) né il testo "Foto Profilo"
+   - Stato atteso: foto reale di Paolo Messina visibile
+
+5. STAGGER ANIMAZIONI HERO
+   - Verifica che l'ordine dei delay sia: eyebrow (nessuno), hero-studio (d1), h1 (d2), hero-sub (d3), hero-cards (d4)
+   - Stato atteso: sequenza di animazioni corretta all'apertura del sito
+
+Per ogni punto riporta: ✅ Confermato / ❌ Non trovato / ⚠️ Parziale — con dettaglio del codice rilevato.
+
+Al termine della verifica, se ci sono anomalie, correggi direttamente il file index.html e fornisci la versione aggiornata da caricare su GitHub.
+```
+
+---
+
+### 14c. Procedura GitHub Upload (passo-passo per utente non tecnico)
+
+```
+1. Vai su https://github.com/Annaluca17/Studio-Cdlmessina
+2. Assicurati di essere nel branch "main" (visibile in alto a sinistra)
+
+── PER SOSTITUIRE UN FILE ESISTENTE ──
+3. Clicca sul nome del file (es. index.html)
+4. Clicca sull'icona matita ✏️ in alto a destra ("Edit this file")
+5. Seleziona tutto il testo (Ctrl+A) e cancella
+6. Incolla il contenuto del nuovo file
+7. Scorri in basso → "Commit changes"
+8. Lascia il messaggio di default o scrivi una descrizione
+9. Clicca "Commit changes" (bottone verde)
+
+── PER AGGIUNGERE UN FILE NUOVO (es. immagini) ──
+3. Clicca "Add file" → "Upload files"
+4. Trascina il file PNG nella zona di upload
+5. Scorri in basso → "Commit changes"
+6. Clicca "Commit changes" (bottone verde)
+
+── VERIFICA DEPLOY ──
+7. Vai su https://vercel.com → il progetto mostrerà "Building..." per ~60 secondi
+8. Quando compare "Ready", il sito è live
+9. Apri https://studio-cdlmessina-ftdb.vercel.app e verifica visivamente
+```
+
+---
+
+*Documento aggiornato in data 2026-05-09. Sessione: fix logo navbar/footer, aggiunta foto Paolo Messina, aggiunto nome studio nel hero. Prossima milestone: configurazione dominio cdlmessina.it su Vercel.*
