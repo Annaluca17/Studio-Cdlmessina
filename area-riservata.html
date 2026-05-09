@@ -202,52 +202,55 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
 .body{padding:8mm 20mm;flex:1}
 .sec-head{display:flex;align-items:center;gap:8px;margin:6mm 0 4mm}
 .sec-head-line{width:16px;height:1px;background:var(--gold);flex-shrink:0}
-.sec-head-label{font-size:8px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--gold)}
+.sec-head-label{font-size:10px;font-weight:500;letter-spacing:.13em;text-transform:uppercase;color:var(--gold)}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:5mm 8mm}
 .fg.c3{grid-template-columns:1fr 1fr 1fr}
 .fg.c1{grid-template-columns:1fr}
 .fi{display:flex;flex-direction:column;gap:3px}
 .fi.s2{grid-column:span 2}
 .fi.s3{grid-column:span 3}
-.fi label{font-size:7.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.fi input,.fi select,.fi textarea{font-family:'DM Sans',sans-serif;font-size:11px;border:none;border-bottom:1px solid rgba(0,0,0,.15);padding:4px 0;outline:none;color:var(--text);background:transparent;width:100%;transition:border-color .2s}
+.fi label{font-size:9px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.fi input,.fi select,.fi textarea{font-family:'DM Sans',sans-serif;font-size:13px;border:none;border-bottom:1px solid rgba(0,0,0,.15);padding:5px 0;outline:none;color:var(--text);background:transparent;width:100%;transition:border-color .2s}
 .fi input:focus,.fi select:focus,.fi textarea:focus{border-color:var(--gold);background:rgba(184,150,80,.04)}
-.fi textarea{resize:vertical;min-height:40px}
+.fi textarea{resize:vertical;min-height:44px}
 .fi select{appearance:none;cursor:pointer}
 
 /* schedule table */
-.sched{width:100%;border-collapse:collapse;font-size:9px;margin-top:3mm}
-.sched th{background:var(--navy);color:rgba(255,255,255,.7);padding:5px 6px;text-align:left;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.sched{width:100%;border-collapse:collapse;font-size:11px;margin-top:3mm}
+.sched th{background:var(--navy);color:rgba(255,255,255,.7);padding:7px 8px;text-align:left;font-size:9px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
 .sched th:first-child{color:var(--gold)}
-.sched td{border-bottom:1px solid rgba(0,0,0,.07);padding:4px 6px;vertical-align:middle}
+.sched td{border-bottom:1px solid rgba(0,0,0,.07);padding:6px 8px;vertical-align:middle}
 .sched tr:last-child td{border-bottom:none}
-.sched .tot td{background:var(--offwhite);font-weight:500;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--navy)}
-.sched input{font-size:10px;width:100%;border:none;border-bottom:1px solid rgba(0,0,0,.1);background:transparent;outline:none;padding:2px 0;text-align:center;font-family:'DM Sans',sans-serif;color:var(--text)}
+.sched .tot td{background:var(--offwhite);font-weight:500;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--navy)}
+.sched input{font-size:12px;width:100%;border:none;border-bottom:1px solid rgba(0,0,0,.1);background:transparent;outline:none;padding:3px 0;text-align:center;font-family:'DM Sans',sans-serif;color:var(--text)}
 .sched input:focus{border-color:var(--gold)}
+.sched-toggle{display:flex;align-items:center;gap:7px;margin-bottom:3mm;cursor:pointer}
+.sched-toggle input{accent-color:var(--gold);width:13px;height:13px;cursor:pointer;flex-shrink:0}
+.sched-toggle label{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500;cursor:pointer}
 
 /* contract checkboxes */
 .contract-opts{display:flex;flex-wrap:wrap;gap:6mm;margin-top:3mm;align-items:flex-start}
 .co{display:flex;flex-direction:column;gap:4px}
-.co-top{display:flex;align-items:center;gap:5px;font-size:10px}
-.co input[type=checkbox]{accent-color:var(--gold);width:12px;height:12px;cursor:pointer;flex-shrink:0}
-.co-dates{display:flex;gap:6px;margin-left:17px;flex-wrap:wrap}
-.co-dates input{font-size:9px;width:26mm;border:none;border-bottom:1px solid rgba(0,0,0,.12);background:transparent;outline:none;padding:2px 0;font-family:'DM Sans',sans-serif;color:var(--text);text-align:center}
+.co-top{display:flex;align-items:center;gap:6px;font-size:12px}
+.co input[type=checkbox]{accent-color:var(--gold);width:13px;height:13px;cursor:pointer;flex-shrink:0}
+.co-dates{display:flex;gap:6px;margin-left:20px;flex-wrap:wrap}
+.co-dates input{font-size:11px;width:26mm;border:none;border-bottom:1px solid rgba(0,0,0,.12);background:transparent;outline:none;padding:3px 0;font-family:'DM Sans',sans-serif;color:var(--text);text-align:center}
 .co-dates input:focus{border-color:var(--gold)}
-.co-dates label{font-size:8px;color:var(--muted);align-self:center;white-space:nowrap}
+.co-dates label{font-size:10px;color:var(--muted);align-self:center;white-space:nowrap}
 
 /* retrib */
-.retrib{width:100%;border-collapse:collapse;font-size:9px;margin-top:3mm}
-.retrib th{background:var(--navy);color:rgba(255,255,255,.7);padding:5px 8px;text-align:left;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.retrib{width:100%;border-collapse:collapse;font-size:11px;margin-top:3mm}
+.retrib th{background:var(--navy);color:rgba(255,255,255,.7);padding:7px 10px;text-align:left;font-size:9px;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
 .retrib th:first-child{color:var(--gold)}
-.retrib td{border-bottom:1px solid rgba(0,0,0,.07);padding:5px 8px;vertical-align:middle}
+.retrib td{border-bottom:1px solid rgba(0,0,0,.07);padding:7px 10px;vertical-align:middle}
 .retrib tr:last-child td{border-bottom:none}
-.retrib input{font-size:10px;width:100%;border:none;border-bottom:1px solid rgba(0,0,0,.1);background:transparent;outline:none;padding:2px 0;font-family:'DM Sans',sans-serif;color:var(--text)}
+.retrib input{font-size:12px;width:100%;border:none;border-bottom:1px solid rgba(0,0,0,.1);background:transparent;outline:none;padding:3px 0;font-family:'DM Sans',sans-serif;color:var(--text)}
 .retrib input:focus{border-color:var(--gold)}
 
 /* allegati checkboxes */
-.alleg-list{display:flex;flex-direction:column;gap:6px;margin-top:4px}
-.alleg-item{display:flex;align-items:center;gap:7px;font-size:10px}
-.alleg-item input[type=checkbox]{accent-color:var(--gold);width:12px;height:12px;cursor:pointer}
+.alleg-list{display:flex;flex-direction:column;gap:7px;margin-top:4px}
+.alleg-item{display:flex;align-items:center;gap:7px;font-size:12px}
+.alleg-item input[type=checkbox]{accent-color:var(--gold);width:13px;height:13px;cursor:pointer}
 
 /* send box */
 .send-box{background:var(--navy);padding:5mm 6mm;margin-top:6mm}
@@ -531,25 +534,34 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
 
       <!-- Orario di Lavoro -->
       <div class="sec-head"><div class="sec-head-line"></div><div class="sec-head-label">Orario di Lavoro</div></div>
-      <table class="sched">
-        <thead>
-          <tr>
-            <th>Giorno</th>
-            <th>Mattina — Dalle</th>
-            <th>Alle</th>
-            <th>Pomeriggio — Dalle</th>
-            <th>Alle</th>
-            <th>Ore</th>
-          </tr>
-        </thead>
-        <tbody id="sched-body"></tbody>
-        <tfoot>
-          <tr class="tot">
-            <td colspan="5">Totale Ore Settimanali</td>
-            <td><input type="number" name="ore_totali" id="ore-totali" min="0" max="48" step="0.5" style="width:28px;text-align:center"></td>
-          </tr>
-        </tfoot>
-      </table>
+      <div class="fg" style="margin-bottom:5mm">
+        <div class="fi">
+          <label for="ore-totali">Totale Ore Settimanali</label>
+          <input type="number" name="ore_totali" id="ore-totali" min="0" max="48" step="0.5" placeholder="es. 40">
+        </div>
+        <div class="fi">
+          <label for="perc-parttime">% Part Time (se applicabile)</label>
+          <input type="number" name="perc_parttime" id="perc-parttime" min="1" max="99" step="0.01" placeholder="es. 50">
+        </div>
+      </div>
+      <div class="sched-toggle">
+        <input type="checkbox" id="toggle-sched" onchange="toggleSched(this)">
+        <label for="toggle-sched">Compila tabella oraria giornaliera (opzionale)</label>
+      </div>
+      <div id="sched-wrap" style="display:none">
+        <table class="sched">
+          <thead>
+            <tr>
+              <th>Giorno</th>
+              <th>Mattina — Dalle</th>
+              <th>Alle</th>
+              <th>Pomeriggio — Dalle</th>
+              <th>Alle</th>
+            </tr>
+          </thead>
+          <tbody id="sched-body"></tbody>
+        </table>
+      </div>
 
       <!-- Retribuzione -->
       <div class="sec-head"><div class="sec-head-line"></div><div class="sec-head-label">Condizioni Retributive (importi lordi €/mese)</div></div>
@@ -689,19 +701,22 @@ let pendingPasswordSet = false;
 
 // Build schedule table
 (function buildSched(){
-  const days = ['Lunedì','Martedì','Mercoledì','Giovedì','Venerdì','Sabato','Domenica'];
+  const days = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
   const tbody = document.getElementById('sched-body');
   days.forEach(d => {
     tbody.innerHTML += `<tr>
-      <td>${d}</td>
-      <td><input type="time" name="m_dalle_${d}" style="width:52px"></td>
-      <td><input type="time" name="m_alle_${d}" style="width:52px"></td>
-      <td><input type="time" name="p_dalle_${d}" style="width:52px"></td>
-      <td><input type="time" name="p_alle_${d}" style="width:52px"></td>
-      <td><input type="number" name="ore_${d}" min="0" max="12" step="0.5" style="width:32px;text-align:center"></td>
+      <td style="font-weight:500">${d}</td>
+      <td><input type="time" name="m_dalle_${d}"></td>
+      <td><input type="time" name="m_alle_${d}"></td>
+      <td><input type="time" name="p_dalle_${d}"></td>
+      <td><input type="time" name="p_alle_${d}"></td>
     </tr>`;
   });
 })();
+
+function toggleSched(cb) {
+  document.getElementById('sched-wrap').style.display = cb.checked ? '' : 'none';
+}
 
 // Set today's date on the form
 document.getElementById('f-data-firma').value = new Date().toISOString().split('T')[0];
@@ -896,8 +911,7 @@ function formatDate(d) {
 async function submitForm() {
   const btn = document.getElementById('fc-send-btn');
   const msgEl = document.getElementById('fc-msg');
-  
-  // Basic validation
+
   const req = ['f-azienda','f-sede','f-cognome-nome','f-cf'];
   let valid = true;
   req.forEach(id => {
@@ -915,14 +929,33 @@ async function submitForm() {
   btn.innerHTML = 'Invio… <span class="arr">↻</span>';
   msgEl.className = 'fc-msg';
 
-  // Collect form data
+  // Colonne esistenti nella tabella DB
+  const DB_COLS = new Set([
+    'azienda','sede','cognome_nome','codice_fiscale','qualifica','livello','mansioni',
+    'tempo_pieno','tempo_parziale','indeterminato','determinato','apprendistato',
+    'indet_dal','det_dal','det_al','appr_dal',
+    'ore_totali','perc_parttime',
+    'stipendio','superminimo','altre_voci',
+    'stipendio_note','superminimo_note','altre_note',
+    'note','all_doc','all_cf','all_pds',
+    'data_firma','firma_datore','firma_lavoratore'
+  ]);
+
   const sheet = document.getElementById('sheet-assunzione');
   const inputs = sheet.querySelectorAll('input,select,textarea');
   const payload = { submitted_by: currentUser.email, submitted_at: new Date().toISOString() };
+  const orario = {};
+
   inputs.forEach(inp => {
     if (!inp.name) return;
-    payload[inp.name] = inp.type === 'checkbox' ? inp.checked : inp.value;
+    const val = inp.type === 'checkbox' ? inp.checked : inp.value;
+    if (DB_COLS.has(inp.name)) {
+      payload[inp.name] = val;
+    } else {
+      orario[inp.name] = val;
+    }
   });
+  if (Object.keys(orario).length) payload.orario_jsonb = orario;
 
   const { error } = await sb.from('moduli_assunzione').insert([payload]);
 
