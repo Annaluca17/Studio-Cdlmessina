@@ -60,8 +60,8 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
 .screen{display:none;width:100%;min-height:100vh}
 .screen.active{display:flex}
 
-/* ── LOGIN SCREEN ── */
-#screen-login{align-items:center;justify-content:center;background:var(--navy);flex-direction:column;gap:0}
+/* ── LOGIN / SET-PASSWORD SCREENS ── */
+#screen-login,#screen-setpwd{align-items:center;justify-content:center;background:var(--navy);flex-direction:column;gap:0}
 .login-wrap{width:100%;max-width:400px;padding:24px}
 .login-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:36px}
 .login-line{width:20px;height:1px;background:var(--gold)}
@@ -631,6 +631,36 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
   </div><!-- /form-frame -->
 </div><!-- /screen-form -->
 
+<!-- ══════════════════════════════════════════
+     SCREEN 4 — IMPOSTA PASSWORD (invite / recovery)
+═══════════════════════════════════════════ -->
+<div class="screen" id="screen-setpwd">
+  <div class="login-wrap">
+    <img class="login-logo" src="Logo_migliorato.png" alt="Studio CDL Paolo Messina">
+    <div class="login-eyebrow">
+      <div class="login-line"></div>
+      <div class="login-eye-text">Area Riservata Clienti</div>
+    </div>
+    <div class="login-title" id="setpwd-title">Benvenuto.<br>Imposta la tua <em>password.</em></div>
+    <div class="login-sub">Prima di accedere all'area riservata è necessario impostare una password personale di almeno 8 caratteri.</div>
+    <form class="lf" id="setpwd-form" onsubmit="setInitialPassword(event)">
+      <div class="lf-row">
+        <label for="sp-new">Nuova Password</label>
+        <input type="password" id="sp-new" placeholder="min. 8 caratteri" minlength="8" required autocomplete="new-password">
+      </div>
+      <div class="lf-row">
+        <label for="sp-confirm">Conferma Password</label>
+        <input type="password" id="sp-confirm" placeholder="ripeti la password" minlength="8" required autocomplete="new-password">
+      </div>
+      <p class="login-msg" id="setpwd-msg"></p>
+      <button type="submit" class="login-btn" id="setpwd-btn">
+        Salva e accedi <span class="login-arr">→</span>
+      </button>
+    </form>
+    <div class="login-footer">Studio CDL Paolo Messina · Paternò (CT) · P.IVA 05799860878</div>
+  </div>
+</div>
+
 <script>
 /* ══════════════════════════════════════════════
    INIT
@@ -639,6 +669,23 @@ const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 let currentUser = null;
+
+// Detect invite / recovery links before Supabase clears the hash
+let pendingPasswordSet = false;
+(function(){
+  const hash = window.location.hash.slice(1);
+  const params = {};
+  hash.split('&').forEach(p => { const [k,v]=p.split('='); if(k) params[k]=v||''; });
+  if (params.type === 'invite' || params.type === 'recovery') {
+    pendingPasswordSet = true;
+    if (params.type === 'recovery') {
+      document.addEventListener('DOMContentLoaded', () => {
+        const t = document.getElementById('setpwd-title');
+        if (t) t.innerHTML = 'Reimposta la tua <em>password.</em>';
+      });
+    }
+  }
+})();
 
 // Build schedule table
 (function buildSched(){
@@ -663,7 +710,10 @@ document.getElementById('f-data-firma').value = new Date().toISOString().split('
    AUTH
 ═══════════════════════════════════════════════ */
 sb.auth.onAuthStateChange((event, session) => {
-  if (session) {
+  if (event === 'PASSWORD_RECOVERY' || (session && pendingPasswordSet)) {
+    pendingPasswordSet = false;
+    if (session) { currentUser = session.user; showSetPassword(); }
+  } else if (session) {
     currentUser = session.user;
     showApp(session.user);
   } else {
@@ -701,6 +751,16 @@ function showLogin() {
   document.getElementById('screen-login').classList.add('active');
   document.getElementById('screen-app').classList.remove('active');
   document.getElementById('screen-form').classList.remove('active');
+  document.getElementById('screen-setpwd').classList.remove('active');
+  document.getElementById('main-nav').style.display = 'none';
+  document.getElementById('main-gold-rule').style.display = 'none';
+}
+
+function showSetPassword() {
+  document.getElementById('screen-login').classList.remove('active');
+  document.getElementById('screen-app').classList.remove('active');
+  document.getElementById('screen-form').classList.remove('active');
+  document.getElementById('screen-setpwd').classList.add('active');
   document.getElementById('main-nav').style.display = 'none';
   document.getElementById('main-gold-rule').style.display = 'none';
 }
@@ -711,6 +771,7 @@ function showApp(user) {
   document.getElementById('screen-login').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
   document.getElementById('screen-form').classList.remove('active');
+  document.getElementById('screen-setpwd').classList.remove('active');
   document.getElementById('main-nav').style.display = '';
   document.getElementById('main-gold-rule').style.display = '';
   document.getElementById('nav-user-email').textContent = user.email;
@@ -889,6 +950,32 @@ async function submitForm() {
   }
   btn.disabled = false;
   btn.innerHTML = 'Invia allo Studio <span class="arr">→</span>';
+}
+
+/* ══════════════════════════════════════════════
+   SET INITIAL PASSWORD (invite / recovery)
+═══════════════════════════════════════════════ */
+async function setInitialPassword(e) {
+  e.preventDefault();
+  const btn = document.getElementById('setpwd-btn');
+  const msg = document.getElementById('setpwd-msg');
+  const np  = document.getElementById('sp-new').value;
+  const cp  = document.getElementById('sp-confirm').value;
+  if (np !== cp) {
+    msg.textContent = '✗ Le password non coincidono.';
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = 'Salvataggio… <span class="login-arr">↻</span>';
+  msg.textContent = '';
+  const { error } = await sb.auth.updateUser({ password: np });
+  if (error) {
+    msg.textContent = '✗ Errore: ' + error.message;
+    btn.disabled = false;
+    btn.innerHTML = 'Salva e accedi <span class="login-arr">→</span>';
+  } else {
+    showApp(currentUser);
+  }
 }
 
 /* ══════════════════════════════════════════════
