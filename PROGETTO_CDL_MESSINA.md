@@ -108,8 +108,8 @@ Studio-Cdlmessina/
 ├── robots.txt              ✅ LIVE
 ├── sitemap.xml             ✅ LIVE
 ├── PROGETTO_CDL_MESSINA.md ✅ Project brief
-├── privacy-policy.html     ❌ MANCANTE — link presente nel footer, pagina non creata
-└── cookie-policy.html      ❌ MANCANTE — link presente nel footer, pagina non creata
+├── privacy-policy.html     ✅ LIVE — informativa GDPR (creata 2026-05-09)
+└── cookie-policy.html      ✅ LIVE — informativa cookie (creata 2026-05-09)
 ```
 
 ---
@@ -330,14 +330,14 @@ Presenti nel repository ZIP `Studio_CDL_Messina_Design_System.zip`:
 ## 10. TODO — Priorità
 
 ### 🔴 Critico (P0)
-- [ ] **privacy-policy.html** — creare e caricare su GitHub (link già presente nel footer e nel form)
-- [ ] **cookie-policy.html** — creare e caricare su GitHub
+- [x] **privacy-policy.html** — ✅ creata e deployata (2026-05-09)
+- [x] **cookie-policy.html** — ✅ creata e deployata (2026-05-09)
 - [ ] **Supabase ANON KEY** — verificare che sia incollata correttamente in area-riservata.html
 - [ ] **Redirect URL Supabase** — impostare a `https://www.cdlmessina.it/area-riservata.html` quando dominio attivo
 
 ### 🟡 Importante (P1)
 - [ ] **Foto profilo Paolo Messina** — caricare `foto-profilo.jpg` nel repo e sostituire placeholder SVG in `#chi-sono`
-- [ ] **Collegamento Area Riservata** — aggiungere link discreto nel footer di index.html
+- [x] **Collegamento Area Riservata** — ✅ link aggiunto nel footer di index.html (2026-05-09)
 - [ ] **Dominio cdlmessina.it** — configurare DNS su Vercel (Settings → Domains)
 - [ ] **Notifiche email** — Supabase Database Webhooks → trigger su insert in `moduli_assunzione` → POST a Formspree o Resend
 
