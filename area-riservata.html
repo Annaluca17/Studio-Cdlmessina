@@ -130,6 +130,28 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
 .form-card-desc{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:20px}
 .form-card-cta{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:6px}
 
+/* ── ADMIN ── */
+.admin-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px}
+.admin-count{font-size:12px;color:var(--muted)}
+.admin-count strong{color:var(--navy)}
+.admin-refresh{font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;background:transparent;color:var(--navy);border:1px solid var(--rule);padding:7px 16px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .2s}
+.admin-refresh:hover{background:var(--offwhite)}
+.admin-table-wrap{overflow-x:auto;border:1px solid var(--rule)}
+.admin-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.admin-table th{text-align:left;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:12px 16px;border-bottom:2px solid var(--rule);white-space:nowrap;font-weight:500;background:var(--offwhite)}
+.admin-table td{padding:14px 16px;border-bottom:1px solid var(--rule);color:var(--text);vertical-align:top}
+.admin-table tr:last-child td{border-bottom:none}
+.admin-table tr:hover td{background:var(--offwhite)}
+.admin-badge{display:inline-block;font-size:8px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border:1px solid}
+.admin-badge.indet{color:#2d7a4f;border-color:rgba(45,122,79,.3);background:rgba(45,122,79,.06)}
+.admin-badge.det{color:var(--blue);border-color:rgba(30,109,181,.3);background:rgba(30,109,181,.06)}
+.admin-badge.appr{color:var(--gold);border-color:var(--gold-dim);background:rgba(184,150,80,.06)}
+.admin-azienda{font-weight:500;color:var(--navy);margin-bottom:2px}
+.admin-dip{font-size:11px;color:var(--muted)}
+.admin-empty{padding:48px 24px;text-align:center;color:var(--muted);font-size:13px;background:#fff}
+.admin-loading{padding:48px 24px;text-align:center;color:var(--muted);font-size:13px}
+.tab-admin{display:none}
+
 /* ── CHANGE PASSWORD ── */
 .pwd-section{max-width:420px}
 .pwd-note{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.75;padding:14px;background:#fff;border-left:3px solid var(--gold-dim)}
@@ -333,6 +355,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
       <div class="tab active" onclick="switchTab('documenti',this)">Documenti</div>
       <div class="tab" onclick="switchTab('moduli',this)">Moduli</div>
       <div class="tab" onclick="switchTab('account',this)">Account</div>
+      <div class="tab tab-admin" id="tab-admin" onclick="switchTab('admin',this)">Admin ★</div>
     </div>
 
     <!-- TAB: Documenti -->
@@ -357,6 +380,17 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
           <div class="form-card-desc">Prossimamente disponibile. Contattare lo studio per invii urgenti.</div>
           <div class="form-card-cta" style="color:var(--muted)">In preparazione</div>
         </div>
+      </div>
+    </div>
+
+    <!-- TAB: Admin (solo paolo.messina@cdlmessina.it) -->
+    <div class="tab-panel" id="panel-admin">
+      <div class="admin-toolbar">
+        <div class="admin-count">Moduli ricevuti: <strong id="admin-count">—</strong></div>
+        <button class="admin-refresh" onclick="loadAdminData()">↻ Aggiorna</button>
+      </div>
+      <div id="admin-table-wrap">
+        <div class="admin-loading">Caricamento…</div>
       </div>
     </div>
 
@@ -671,6 +705,8 @@ function showLogin() {
   document.getElementById('main-gold-rule').style.display = 'none';
 }
 
+const ADMIN_EMAIL = 'paolo.messina@cdlmessina.it';
+
 function showApp(user) {
   document.getElementById('screen-login').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
@@ -678,6 +714,10 @@ function showApp(user) {
   document.getElementById('main-nav').style.display = '';
   document.getElementById('main-gold-rule').style.display = '';
   document.getElementById('nav-user-email').textContent = user.email;
+  // Mostra tab Admin solo per Paolo
+  const isAdmin = user.email === ADMIN_EMAIL;
+  document.getElementById('tab-admin').style.display = isAdmin ? '' : 'none';
+  if (isAdmin) loadAdminData();
   renderDocuments();
 }
 
@@ -702,6 +742,57 @@ function switchTab(panelId, el) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-' + panelId).classList.add('active');
+}
+
+/* ══════════════════════════════════════════════
+   ADMIN
+═══════════════════════════════════════════════ */
+async function loadAdminData() {
+  const wrap = document.getElementById('admin-table-wrap');
+  wrap.innerHTML = '<div class="admin-loading">Caricamento…</div>';
+
+  const { data, error } = await sb
+    .from('moduli_assunzione')
+    .select('id,submitted_by,submitted_at,azienda,sede,cognome_nome,indeterminato,determinato,apprendistato,det_dal,det_al,indet_dal,appr_dal')
+    .order('submitted_at', { ascending: false });
+
+  if (error) {
+    wrap.innerHTML = '<div class="admin-empty">Errore nel caricamento dati.</div>';
+    return;
+  }
+  if (!data || !data.length) {
+    wrap.innerHTML = '<div class="admin-empty">Nessun modulo ricevuto.</div>';
+    document.getElementById('admin-count').textContent = '0';
+    return;
+  }
+
+  document.getElementById('admin-count').textContent = data.length;
+
+  const rows = data.map(r => {
+    const dt = new Date(r.submitted_at).toLocaleString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    let tipo = '—', badge = '';
+    if (r.indeterminato) { tipo = 'Indeterminato'; badge = 'indet'; }
+    else if (r.determinato) { tipo = 'Determinato'; badge = 'det'; }
+    else if (r.apprendistato) { tipo = 'Apprendistato'; badge = 'appr'; }
+    const dataTipo = r.indet_dal || r.det_dal || r.appr_dal || '';
+    return `<tr>
+      <td style="white-space:nowrap;color:var(--muted);font-size:11px">${dt}</td>
+      <td style="font-size:11px;color:var(--muted)">${r.submitted_by || '—'}</td>
+      <td><div class="admin-azienda">${r.azienda || '—'}</div><div class="admin-dip">${r.sede || ''}</div></td>
+      <td><div class="admin-azienda">${r.cognome_nome || '—'}</div></td>
+      <td>${badge ? `<span class="admin-badge ${badge}">${tipo}</span>` : '—'}</td>
+      <td style="font-size:11px;color:var(--muted);white-space:nowrap">${dataTipo}</td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead><tr>
+        <th>Data</th><th>Cliente</th><th>Azienda / Sede</th><th>Dipendente</th><th>Contratto</th><th>Dal</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
 }
 
 /* ══════════════════════════════════════════════

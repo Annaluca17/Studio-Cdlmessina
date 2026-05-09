@@ -374,7 +374,7 @@ Foto profilo: ✅ ATTIVA — file Paolo_Messina.png nel repo
 - [x] **Notifiche email a Paolo** — ✅ implementato: POST a Formspree dopo insert Supabase in submitForm() (2026-05-09)
 
 ### 🟢 Fase 2 — Portale Clienti (priorità da definire)
-- [ ] **Pannello admin** — `admin.html` protetta per Paolo: visualizza moduli ricevuti, carica documenti nel bucket, gestisce account clienti senza accedere alla Supabase Dashboard
+- [x] **Pannello admin (base)** — ✅ tab Admin in area-riservata.html, visibile solo a paolo.messina@cdlmessina.it, mostra tutti i moduli_assunzione ordinati per data (2026-05-09)
 - [ ] **Notifica email al cliente** — email automatica quando Paolo carica un nuovo documento nel bucket `documenti`
 - [ ] **Upload documenti dal cliente** — bucket "uploads-clienti" con RLS per-utente; cliente può caricare documenti (es. da firmare) e Paolo li vede nel pannello admin
 - [ ] **Adempimenti Sicurezza** — convertire template A4 (D.Lgs. 81/08) in form compilabile con stesso pattern del Modulo Assunzione
