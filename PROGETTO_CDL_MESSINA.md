@@ -208,10 +208,13 @@ toggleMenu()   // hamburger mobile
 
 ### Supabase — Configurazione
 ```javascript
-// VARIABILI DA SOSTITUIRE (righe iniziali del file)
+// Valori già impostati e verificati in area-riservata.html
 const SUPABASE_URL  = 'https://zhrvcklhcbdzkgzlonbr.supabase.co';
-const SUPABASE_ANON = 'eyXXX...'; // anon key da Settings → API
+const SUPABASE_ANON = 'eyJhbGci...CZk4'; // JWT anon key — verificata 2026-05-09
 ```
+
+> ⚠️ **FREE TIER — PAUSA AUTOMATICA:** Supabase mette in pausa il progetto dopo 7 giorni di inattività. Alla prima richiesta dopo una pausa, il sito impiega 1-2 minuti a rispondere (status `COMING_UP`). Per evitarlo: fare almeno un accesso a settimana oppure passare al piano Pro ($25/mese).
+
 
 **URL Configuration su Supabase (già fatto o da fare):**
 ```
@@ -366,7 +369,9 @@ Foto profilo: ✅ ATTIVA — file Paolo_Messina.png nel repo
 - [x] **Foto profilo Paolo Messina** — ✅ Paolo_Messina.png attivo in #chi-sono (2026-05-09)
 - [x] **Nome Studio visibile nel hero** — ✅ aggiunto elemento .hero-studio (2026-05-09)
 - [x] **Supabase ANON KEY** — ✅ verificata: JWT reale presente in area-riservata.html riga 25 (2026-05-09)
+- [x] **Tabella `moduli_assunzione`** — ✅ creata via MCP con RLS insert+select (2026-05-09)
 - [ ] **Redirect URL Supabase** — aggiornare a `https://www.cdlmessina.it/area-riservata.html` quando dominio attivo
+- [ ] **Account Supabase** — creare utente `segreteria@cdlmessina.it` via Auth → Invite user (admin); creare account per ogni cliente
 
 ### 🟡 Importante (P1)
 - [x] **Collegamento Area Riservata** — ✅ link nel footer di index.html (2026-05-09)
@@ -374,7 +379,7 @@ Foto profilo: ✅ ATTIVA — file Paolo_Messina.png nel repo
 - [x] **Notifiche email a Paolo** — ✅ implementato: POST a Formspree dopo insert Supabase in submitForm() (2026-05-09)
 
 ### 🟢 Fase 2 — Portale Clienti (priorità da definire)
-- [x] **Pannello admin (base)** — ✅ tab Admin in area-riservata.html, visibile solo a paolo.messina@cdlmessina.it, mostra tutti i moduli_assunzione ordinati per data (2026-05-09)
+- [x] **Pannello admin (base)** — ✅ tab Admin in area-riservata.html, visibile solo a segreteria@cdlmessina.it, mostra tutti i moduli_assunzione ordinati per data (2026-05-09)
 - [ ] **Notifica email al cliente** — email automatica quando Paolo carica un nuovo documento nel bucket `documenti`
 - [ ] **Upload documenti dal cliente** — bucket "uploads-clienti" con RLS per-utente; cliente può caricare documenti (es. da firmare) e Paolo li vede nel pannello admin
 - [ ] **Adempimenti Sicurezza** — convertire template A4 (D.Lgs. 81/08) in form compilabile con stesso pattern del Modulo Assunzione
