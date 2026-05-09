@@ -150,7 +150,6 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
 .admin-dip{font-size:11px;color:var(--muted)}
 .admin-empty{padding:48px 24px;text-align:center;color:var(--muted);font-size:13px;background:#fff}
 .admin-loading{padding:48px 24px;text-align:center;color:var(--muted);font-size:13px}
-.tab-admin{display:none}
 
 /* ── CHANGE PASSWORD ── */
 .pwd-section{max-width:420px}
@@ -390,7 +389,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
       <div class="tab active" onclick="switchTab('documenti',this)">Documenti</div>
       <div class="tab" onclick="switchTab('moduli',this)">Moduli</div>
       <div class="tab" onclick="switchTab('account',this)">Account</div>
-      <div class="tab tab-admin" id="tab-admin" onclick="switchTab('admin',this)">Admin ★</div>
+      <div class="tab" id="tab-admin" style="display:none" onclick="switchTab('admin',this)">Admin ★</div>
     </div>
 
     <!-- TAB: Documenti -->
