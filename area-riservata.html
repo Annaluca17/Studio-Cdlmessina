@@ -247,10 +247,13 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
 .retrib input{font-size:12px;width:100%;border:none;border-bottom:1px solid rgba(0,0,0,.1);background:transparent;outline:none;padding:3px 0;font-family:'DM Sans',sans-serif;color:var(--text)}
 .retrib input:focus{border-color:var(--gold)}
 
-/* allegati checkboxes */
-.alleg-list{display:flex;flex-direction:column;gap:7px;margin-top:4px}
+/* allegati con upload */
+.alleg-list{display:flex;flex-direction:column;gap:10px;margin-top:4px}
 .alleg-item{display:flex;align-items:center;gap:7px;font-size:12px}
 .alleg-item input[type=checkbox]{accent-color:var(--gold);width:13px;height:13px;cursor:pointer}
+.alleg-file-input{font-family:'DM Sans',sans-serif;font-size:11px;color:var(--muted);margin-left:20px;margin-top:3px}
+.alleg-file-input::file-selector-button{font-family:'DM Sans',sans-serif;font-size:10px;letter-spacing:.06em;background:var(--offwhite);border:1px solid var(--rule);padding:5px 12px;cursor:pointer;color:var(--navy);transition:background .2s}
+.alleg-file-input::file-selector-button:hover{background:var(--gold-dim)}
 
 /* send box */
 .send-box{background:var(--navy);padding:5mm 6mm;margin-top:6mm}
@@ -608,9 +611,18 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
         <div>
           <div class="sec-head" style="margin-top:0"><div class="sec-head-line"></div><div class="sec-head-label">Allegati Richiesti</div></div>
           <div class="alleg-list">
-            <div class="alleg-item"><input type="checkbox" name="all_doc" id="all-doc"><label for="all-doc">Documento d'Identità (fronte/retro)</label></div>
-            <div class="alleg-item"><input type="checkbox" name="all_cf" id="all-cf"><label for="all-cf">Codice Fiscale</label></div>
-            <div class="alleg-item"><input type="checkbox" name="all_pds" id="all-pds"><label for="all-pds">Permesso di Soggiorno (solo extra-UE)</label></div>
+            <div>
+              <div class="alleg-item"><input type="checkbox" name="all_doc" id="all-doc"><label for="all-doc">Documento d'Identità (fronte/retro)</label></div>
+              <input type="file" id="file-doc-id" accept="image/*,.pdf" class="alleg-file-input">
+            </div>
+            <div>
+              <div class="alleg-item"><input type="checkbox" name="all_cf" id="all-cf"><label for="all-cf">Codice Fiscale</label></div>
+              <input type="file" id="file-cf" accept="image/*,.pdf" class="alleg-file-input">
+            </div>
+            <div>
+              <div class="alleg-item"><input type="checkbox" name="all_pds" id="all-pds"><label for="all-pds">Permesso di Soggiorno (solo extra-UE, facoltativo)</label></div>
+              <input type="file" id="file-pds" accept="image/*,.pdf" class="alleg-file-input">
+            </div>
           </div>
         </div>
         <div>
@@ -717,6 +729,14 @@ let pendingPasswordSet = false;
 function toggleSched(cb) {
   document.getElementById('sched-wrap').style.display = cb.checked ? '' : 'none';
 }
+
+// Auto-check allegati quando si seleziona un file
+document.querySelectorAll('.alleg-file-input').forEach(inp => {
+  inp.addEventListener('change', () => {
+    const cb = inp.parentElement.querySelector('input[type=checkbox]');
+    if (cb) cb.checked = !!inp.files.length;
+  });
+});
 
 // Set today's date on the form
 document.getElementById('f-data-firma').value = new Date().toISOString().split('T')[0];
@@ -920,7 +940,7 @@ async function submitForm() {
     else { el.style.borderColor=''; }
   });
   if (!valid) {
-    msgEl.textContent = 'Compilare i campi obbligatori (*)';
+    msgEl.textContent = '✗ Compilare i campi obbligatori contrassegnati con (*)';
     msgEl.className = 'fc-msg show err';
     return;
   }
@@ -929,7 +949,6 @@ async function submitForm() {
   btn.innerHTML = 'Invio… <span class="arr">↻</span>';
   msgEl.className = 'fc-msg';
 
-  // Colonne esistenti nella tabella DB
   const DB_COLS = new Set([
     'azienda','sede','cognome_nome','codice_fiscale','qualifica','livello','mansioni',
     'tempo_pieno','tempo_parziale','indeterminato','determinato','apprendistato',
@@ -938,16 +957,23 @@ async function submitForm() {
     'stipendio','superminimo','altre_voci',
     'stipendio_note','superminimo_note','altre_note',
     'note','all_doc','all_cf','all_pds',
-    'data_firma','firma_datore','firma_lavoratore'
+    'data_firma','firma_datore','firma_lavoratore',
+    'file_doc_identita','file_codice_fiscale','file_permesso_soggiorno'
   ]);
+  const DATE_COLS = new Set(['indet_dal','det_dal','det_al','appr_dal','data_firma']);
+  const NUM_COLS = new Set(['ore_totali','perc_parttime','stipendio','superminimo','altre_voci']);
 
   const sheet = document.getElementById('sheet-assunzione');
-  const inputs = sheet.querySelectorAll('input,select,textarea');
-  const payload = { submitted_by: currentUser.email, submitted_at: new Date().toISOString() };
+  const inputs = sheet.querySelectorAll('input[name],select[name],textarea[name]');
+  const payload = {
+    user_id: currentUser.id,
+    submitted_by: currentUser.email,
+    submitted_at: new Date().toISOString()
+  };
   const orario = {};
 
   inputs.forEach(inp => {
-    if (!inp.name) return;
+    if (!inp.name || inp.type === 'file') return;
     const val = inp.type === 'checkbox' ? inp.checked : inp.value;
     if (DB_COLS.has(inp.name)) {
       payload[inp.name] = val;
@@ -955,15 +981,46 @@ async function submitForm() {
       orario[inp.name] = val;
     }
   });
+
+  // Stringhe vuote → null per colonne DATE e NUMERIC
+  DATE_COLS.forEach(k => { if (payload[k] === '') payload[k] = null; });
+  NUM_COLS.forEach(k => { if (payload[k] === '') payload[k] = null; });
   if (Object.keys(orario).length) payload.orario_jsonb = orario;
+
+  // Upload allegati su Supabase Storage
+  const files = [
+    { inputId: 'file-doc-id',  col: 'file_doc_identita',        label: 'Documento d\'identità' },
+    { inputId: 'file-cf',      col: 'file_codice_fiscale',       label: 'Codice Fiscale' },
+    { inputId: 'file-pds',     col: 'file_permesso_soggiorno',   label: 'Permesso di Soggiorno' }
+  ];
+  for (const f of files) {
+    const fileInput = document.getElementById(f.inputId);
+    const file = fileInput && fileInput.files[0];
+    if (!file) continue;
+    const ts = Date.now();
+    const ext = file.name.split('.').pop().toLowerCase();
+    const path = 'allegati/' + currentUser.id + '/' + f.col + '_' + ts + '.' + ext;
+    const { error: upErr } = await sb.storage.from('documenti').upload(path, file);
+    if (upErr) {
+      msgEl.textContent = '✗ Errore upload ' + f.label + ': ' + upErr.message;
+      msgEl.className = 'fc-msg show err';
+      btn.disabled = false;
+      btn.innerHTML = 'Invia allo Studio <span class="arr">→</span>';
+      return;
+    }
+    payload[f.col] = path;
+  }
 
   const { error } = await sb.from('moduli_assunzione').insert([payload]);
 
   if (error) {
-    msgEl.textContent = '✗ Errore invio. Inviare per email a segreteria@cdlmessina.it';
+    let msg = '✗ Errore invio modulo';
+    if (error.message) msg += ': ' + error.message;
+    if (error.details) msg += ' — ' + error.details;
+    msg += '. In caso di problemi persistenti inviare per email a segreteria@cdlmessina.it';
+    msgEl.textContent = msg;
     msgEl.className = 'fc-msg show err';
   } else {
-    // Notifica email a Paolo via Formspree
     try {
       await fetch('https://formspree.io/f/meevlvwk', {
         method: 'POST',
@@ -977,7 +1034,7 @@ async function submitForm() {
           nota: 'Modulo disponibile nella dashboard Supabase → Table Editor → moduli_assunzione'
         })
       });
-    } catch (_) { /* notifica non bloccante */ }
+    } catch (_) {}
     msgEl.textContent = '✓ Modulo inviato correttamente. Lo studio lo riceverà entro breve.';
     msgEl.className = 'fc-msg show';
   }
