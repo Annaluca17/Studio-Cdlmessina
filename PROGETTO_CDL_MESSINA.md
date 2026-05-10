@@ -386,9 +386,10 @@ Foto profilo: ✅ ATTIVA — file Paolo_Messina.png nel repo
 - [x] **Tabella `documenti_cliente`** — ✅ creata con RLS broadcast + per-utente (2026-05-10)
 - [x] **Fix invio modulo** — ✅ aggiunto user_id al payload, null cleanup date/numeric, whitelist colonne (2026-05-09)
 - [x] **Security linter Supabase** — ✅ rimossa utenti_view, hardened get_utenti(), revoke anon (2026-05-10)
-- [ ] **Redirect URL Supabase** — aggiornare Site URL a `https://www.cdlmessina.it/area-riservata.html` quando dominio attivo
-- [ ] **Email template italiano** — Auth → Email Templates → Invite user: tradurre in italiano
-- [ ] **Leaked password protection** — Auth → Settings → Password Security → abilitare
+- [x] **Dominio cdlmessina.it** — ✅ DNS configurato, sito live su www.cdlmessina.it (2026-05-10)
+- [x] **Email template italiano** — ✅ tradotto (2026-05-10)
+- [ ] **Redirect URL Supabase** — aggiornare Site URL a `https://www.cdlmessina.it/area-riservata.html`
+- [ ] **SMTP custom** — configurare Auth → SMTP per inviare da segreteria@cdlmessina.it invece di noreply@supabase
 
 ### 🟡 Importante (P1)
 - [x] **Link Area Clienti nell'header** — ✅ bottone gold nella nav desktop + menu mobile (2026-05-10)
@@ -398,7 +399,7 @@ Foto profilo: ✅ ATTIVA — file Paolo_Messina.png nel repo
 - [x] **Upload allegati modulo** — ✅ doc identità, CF, permesso soggiorno su Storage (2026-05-09)
 - [x] **Conferma invio modulo** — ✅ overlay a schermo intero + download PDF (2026-05-10)
 - [x] **Schermata imposta password** — ✅ screen-setpwd per flusso invite/recovery (2026-05-09)
-- [ ] **Dominio cdlmessina.it** — configurare DNS su Vercel (Settings → Domains)
+- [x] **Dominio cdlmessina.it** — ✅ attivo su Vercel (2026-05-10)
 
 ### 🟢 Fase 2 (priorità da definire)
 - [ ] **Notifica email al cliente** — email automatica quando admin carica un nuovo documento
