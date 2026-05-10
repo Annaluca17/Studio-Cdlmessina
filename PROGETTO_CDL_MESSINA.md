@@ -201,10 +201,13 @@ toggleMenu()   // hamburger mobile
 ## 6. area-riservata.html — Portale Clienti
 
 ### Architettura
-3 "schermate" mostrate/nascosta via JS (classe `.active`):
+4 "schermate" mostrate/nascoste via JS (classe `.active`):
 - `#screen-login` — form login email+password
-- `#screen-app` — dashboard con tab: Documenti / Moduli / Account
+- `#screen-setpwd` — schermata "Imposta la tua password" (invite/recovery Supabase)
+- `#screen-app` — dashboard con tab: Documenti / Moduli / Account / Admin ★
 - `#screen-form` — modulo assunzione compilabile a schermo intero
+
+Il JS rileva `type=invite` o `type=recovery` nell'URL hash di Supabase e mostra `screen-setpwd` prima dell'accesso alla dashboard.
 
 ### Supabase — Configurazione
 ```javascript
@@ -227,46 +230,43 @@ Redirect URLs: https://studio-cdlmessina-ftdb.vercel.app/area-riservata.html
 
 ### Database Supabase — Tabelle
 
-#### `moduli_assunzione` (già creata via SQL Editor)
+#### `moduli_assunzione`
 ```sql
-create table moduli_assunzione (
-  id uuid default gen_random_uuid() primary key,
-  submitted_by text,           -- email del cliente
-  submitted_at timestamptz,
-  azienda text, sede text,
-  cognome_nome text, codice_fiscale text,
-  qualifica text, livello text, mansioni text,
-  note text,
-  stipendio numeric, superminimo numeric, altre_voci numeric,
-  ore_totali numeric,
-  tempo_pieno boolean, tempo_parziale boolean,
-  indeterminato boolean, determinato boolean, apprendistato boolean,
-  indet_dal date, det_dal date, det_al date, appr_dal date,
-  firma_datore text, firma_lavoratore text, data_firma date,
-  all_doc boolean, all_cf boolean, all_pds boolean
-);
--- RLS attiva
-alter table moduli_assunzione enable row level security;
-create policy "insert own" on moduli_assunzione
-  for insert to authenticated with check (submitted_by = auth.email());
-create policy "select admin" on moduli_assunzione
-  for select to authenticated using (true);
+-- Colonne principali (schema completo):
+id UUID PK, user_id UUID FK→auth.users, submitted_by TEXT, submitted_at TIMESTAMPTZ,
+azienda, sede, cognome_nome, codice_fiscale, qualifica, livello, mansioni, note TEXT,
+stipendio, superminimo, altre_voci NUMERIC, stipendio_note, superminimo_note, altre_note TEXT,
+ore_totali, perc_parttime NUMERIC,
+tempo_pieno, tempo_parziale, indeterminato, determinato, apprendistato BOOLEAN,
+indet_dal, det_dal, det_al, appr_dal, data_firma DATE,
+firma_datore, firma_lavoratore TEXT,
+all_doc, all_cf, all_pds BOOLEAN,
+file_doc_identita, file_codice_fiscale, file_permesso_soggiorno TEXT,
+orario_jsonb JSONB
 ```
+RLS: INSERT richiede `auth.uid() = user_id`; SELECT: utenti vedono propri, admin (`segreteria@cdlmessina.it`) vede tutti.
+
+#### `documenti_cliente`
+```sql
+id UUID PK, user_id UUID FK→auth.users (NULL = broadcast a tutti),
+nome TEXT, descrizione TEXT, file_path TEXT, tag TEXT, created_at TIMESTAMPTZ, created_by TEXT
+```
+RLS: clienti vedono documenti propri + broadcast (`user_id IS NULL`); admin inserisce, legge tutto, elimina.
+
+#### Funzione `get_utenti()`
+Funzione `SECURITY DEFINER` con `SET search_path = ''`. Restituisce `id, email, created_at` da `auth.users` solo se chiamata da `segreteria@cdlmessina.it`. EXECUTE revocato da `anon` e `PUBLIC`.
 
 ### Storage Supabase
 ```
-Bucket: "documenti" → PRIVATE (non pubblico)
-Accesso: signed URL con scadenza 60 secondi (createSignedUrl)
-Gestione: Paolo carica PDF dalla dashboard Supabase → Storage → documenti
-```
-
-### Documenti — Array Configurabile
-```javascript
-// In area-riservata.html — da aggiornare aggiungendo righe
-const DOCUMENTI = [
-  { nome: 'Nome documento', file: 'nome-file.pdf', data: 'YYYY-MM-DD', tag: 'Categoria' },
-];
-// Il file deve esistere nel bucket "documenti" di Supabase Storage
+Bucket: "documenti" → PRIVATE
+Policies RLS su storage.objects:
+  - INSERT: authenticated (upload allegati + documenti)
+  - SELECT: authenticated (download via signed URL 300s)
+  - DELETE: authenticated (admin elimina documenti)
+Struttura cartelle:
+  allegati/{email_sanitized}/         → allegati moduli assunzione
+  condivisi/broadcast/                → documenti per tutti i clienti
+  condivisi/clienti/{user_id}/        → documenti per singolo cliente
 ```
 
 ### Funzionalità Implementate
@@ -274,20 +274,33 @@ const DOCUMENTI = [
 |---|---|
 | Login email + password | ✅ Operativo |
 | Logout | ✅ Operativo |
-| Cambio password autonomo | ✅ Operativo |
-| Download documenti (PDF da Storage) | ✅ Operativo |
-| Modulo Assunzione compilabile online | ✅ Operativo |
-| Salvataggio modulo su database | ✅ Operativo |
-| Stampa/PDF del modulo compilato | ✅ Operativo (window.print()) |
-| Notifica email all'invio modulo | ❌ Da implementare (Supabase Webhooks → Formspree/Resend) |
-| Upload documenti dal cliente | ❌ Da implementare (fase 2) |
+| Schermata "Imposta password" (invite/recovery) | ✅ Operativo |
+| Cambio password autonomo (tab Account) | ✅ Operativo |
+| Download documenti da DB (tab Documenti) | ✅ Operativo — query `documenti_cliente` con RLS |
+| Modulo Assunzione compilabile online | ✅ Operativo — font aumentati, part-time %, tabella orario opzionale |
+| Salvataggio modulo su database | ✅ Operativo — user_id, null cleanup, whitelist colonne |
+| Upload allegati (doc identità, CF, permesso) | ✅ Operativo — file in Storage `allegati/{email}/` |
+| Conferma invio modulo con overlay | ✅ Operativo — overlay a schermo intero con download PDF |
+| Stampa/PDF del modulo compilato | ✅ Operativo (window.print() da overlay conferma) |
+| Notifica email all'invio modulo | ✅ Operativo — POST a Formspree (solo notifica, non dati) |
+| Pannello Admin ★ — moduli ricevuti | ✅ Operativo — tabella + modal dettaglio completo + download allegati |
+| Pannello Admin ★ — upload documenti | ✅ Operativo — carica per singolo cliente o broadcast, elimina |
+| Link "Area Clienti" nell'header pubblico | ✅ Operativo — nav desktop + menu mobile in index.html |
 
-### Gestione Utenti (lato admin Paolo)
+### Gestione Utenti e Documenti (Admin)
 ```
-Creare cliente:  Supabase Dashboard → Authentication → Users → Invite user
-                 Inserire email cliente → Supabase invia email con link
-Reset password:  Dashboard → Users → ••• → Send magic link
-Visualizzare moduli ricevuti: Dashboard → Table Editor → moduli_assunzione
+Creare cliente:   Supabase Dashboard → Authentication → Users → Invite user
+                  → Cliente riceve email italiana → Imposta password → Accesso
+
+Caricare documento per un cliente:
+                  Area Riservata → Admin ★ → Carica Documento
+                  → Scegli destinatario (singolo o "★ Tutti") → Upload
+
+Visualizzare moduli ricevuti:
+                  Area Riservata → Admin ★ → Moduli Ricevuti → Dettagli
+                  (mostra tutti i campi + download allegati)
+
+Reset password:   Dashboard Supabase → Users → ••• → Send magic link
 ```
 
 ---
@@ -368,21 +381,29 @@ Foto profilo: ✅ ATTIVA — file Paolo_Messina.png nel repo
 - [x] **Logo visibile in navbar** — ✅ risolto con Logo_transparent.png (2026-05-09)
 - [x] **Foto profilo Paolo Messina** — ✅ Paolo_Messina.png attivo in #chi-sono (2026-05-09)
 - [x] **Nome Studio visibile nel hero** — ✅ aggiunto elemento .hero-studio (2026-05-09)
-- [x] **Supabase ANON KEY** — ✅ verificata: JWT reale presente in area-riservata.html riga 25 (2026-05-09)
-- [x] **Tabella `moduli_assunzione`** — ✅ creata via MCP con RLS insert+select (2026-05-09)
-- [ ] **Redirect URL Supabase** — aggiornare a `https://www.cdlmessina.it/area-riservata.html` quando dominio attivo
-- [ ] **Account Supabase** — creare utente `segreteria@cdlmessina.it` via Auth → Invite user (admin); creare account per ogni cliente
+- [x] **Supabase ANON KEY** — ✅ verificata (2026-05-09)
+- [x] **Tabella `moduli_assunzione`** — ✅ creata con RLS + tutte le colonne form (2026-05-09)
+- [x] **Tabella `documenti_cliente`** — ✅ creata con RLS broadcast + per-utente (2026-05-10)
+- [x] **Fix invio modulo** — ✅ aggiunto user_id al payload, null cleanup date/numeric, whitelist colonne (2026-05-09)
+- [x] **Security linter Supabase** — ✅ rimossa utenti_view, hardened get_utenti(), revoke anon (2026-05-10)
+- [ ] **Redirect URL Supabase** — aggiornare Site URL a `https://www.cdlmessina.it/area-riservata.html` quando dominio attivo
+- [ ] **Email template italiano** — Auth → Email Templates → Invite user: tradurre in italiano
+- [ ] **Leaked password protection** — Auth → Settings → Password Security → abilitare
 
 ### 🟡 Importante (P1)
-- [x] **Collegamento Area Riservata** — ✅ link nel footer di index.html (2026-05-09)
+- [x] **Link Area Clienti nell'header** — ✅ bottone gold nella nav desktop + menu mobile (2026-05-10)
+- [x] **Collegamento Area Riservata nel footer** — ✅ (2026-05-09)
+- [x] **Notifiche email a Paolo** — ✅ POST a Formspree dopo insert (2026-05-09)
+- [x] **Pannello Admin completo** — ✅ moduli ricevuti con dettaglio + gestione documenti con upload/elimina (2026-05-10)
+- [x] **Upload allegati modulo** — ✅ doc identità, CF, permesso soggiorno su Storage (2026-05-09)
+- [x] **Conferma invio modulo** — ✅ overlay a schermo intero + download PDF (2026-05-10)
+- [x] **Schermata imposta password** — ✅ screen-setpwd per flusso invite/recovery (2026-05-09)
 - [ ] **Dominio cdlmessina.it** — configurare DNS su Vercel (Settings → Domains)
-- [x] **Notifiche email a Paolo** — ✅ implementato: POST a Formspree dopo insert Supabase in submitForm() (2026-05-09)
 
-### 🟢 Fase 2 — Portale Clienti (priorità da definire)
-- [x] **Pannello admin (base)** — ✅ tab Admin in area-riservata.html, visibile solo a segreteria@cdlmessina.it, mostra tutti i moduli_assunzione ordinati per data (2026-05-09)
-- [ ] **Notifica email al cliente** — email automatica quando Paolo carica un nuovo documento nel bucket `documenti`
-- [ ] **Upload documenti dal cliente** — bucket "uploads-clienti" con RLS per-utente; cliente può caricare documenti (es. da firmare) e Paolo li vede nel pannello admin
-- [ ] **Adempimenti Sicurezza** — convertire template A4 (D.Lgs. 81/08) in form compilabile con stesso pattern del Modulo Assunzione
+### 🟢 Fase 2 (priorità da definire)
+- [ ] **Notifica email al cliente** — email automatica quando admin carica un nuovo documento
+- [ ] **Upload documenti dal cliente** — cliente carica file (es. da firmare) visibili all'admin
+- [ ] **Adempimenti Sicurezza** — convertire template A4 (D.Lgs. 81/08) in form compilabile
 
 ---
 
@@ -426,19 +447,21 @@ await sb.from('moduli_assunzione').insert([payload]);
 await sb.auth.updateUser({ password: nuovaPassword });
 ```
 
-### Aggiungere un nuovo documento scaricabile
-1. Caricare il PDF in Supabase Storage → bucket `documenti`
-2. In `area-riservata.html`, trovare l'array `DOCUMENTI` (prime righe del `<script>`)
-3. Aggiungere riga:
-```javascript
-{ nome: 'Titolo documento', file: 'nome-file.pdf', data: 'YYYY-MM-DD', tag: 'Categoria' }
+### Aggiungere un nuovo documento per i clienti
+```
+Area Riservata → login come segreteria@cdlmessina.it → tab Admin ★
+→ Sezione "Carica Documento per i Clienti"
+→ Nome, Categoria, Destinatario ("★ Tutti" o email specifica), File
+→ Clicca "Carica documento"
+Il documento appare nella tab Documenti del cliente destinatario.
+Per eliminare: bottone ✕ nella tabella documenti caricati.
 ```
 
 ### Aggiungere un nuovo cliente
 ```
 Supabase Dashboard → Authentication → Users → Invite user
-→ Email cliente → Supabase invia link
-→ Cliente imposta password
+→ Email cliente → Supabase invia email (tradurre template in italiano!)
+→ Cliente clicca link → area-riservata.html mostra "Imposta la tua password"
 → Login successivo: email + password
 ```
 
@@ -562,4 +585,4 @@ Al termine della verifica, se ci sono anomalie, correggi direttamente il file in
 
 ---
 
-*Documento aggiornato in data 2026-05-09. Sessione: fix logo navbar/footer, aggiunta foto Paolo Messina, aggiunto nome studio nel hero. Prossima milestone: configurazione dominio cdlmessina.it su Vercel.*
+*Documento aggiornato in data 2026-05-10. Sessioni 09-10/05: sito pubblico completo (SEO, privacy, cookie), area riservata con pannello admin (moduli + documenti), sistema documenti da DB con upload/download/elimina, schermata imposta password, conferma invio con PDF, allegati modulo, link Area Clienti nell'header, fix security linter Supabase. Prossima milestone: configurazione dominio cdlmessina.it su Vercel, template email italiano su Supabase.*
