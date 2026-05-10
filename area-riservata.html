@@ -389,6 +389,9 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
       <button type="submit" class="login-btn" id="login-btn">
         Accedi <span class="login-arr">→</span>
       </button>
+      <div style="text-align:center;margin-top:12px">
+        <a href="#" onclick="resetPassword(event)" style="font-size:11px;color:rgba(255,255,255,.45);text-decoration:none">Password dimenticata?</a>
+      </div>
     </form>
     <div class="login-footer">Studio CDL Paolo Messina · Paternò (CT) · P.IVA 05799860878</div>
   </div>
@@ -594,7 +597,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
           <input type="text" id="f-qualifica" name="qualifica" placeholder="es. Operaio, Impiegato">
         </div>
         <div class="fi">
-          <label for="f-livello">Livello</label>
+          <label for="f-livello">Livello <span style="font-weight:400;color:var(--muted)">(facoltativo)</span></label>
           <input type="text" id="f-livello" name="livello" placeholder="es. 3° livello CCNL Commercio">
         </div>
         <div class="fi s2">
@@ -633,6 +636,7 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
           </div>
           <div class="co">
             <div class="co-top"><input type="checkbox" id="c-appr" name="apprendistato"><label for="c-appr">Apprendistato</label></div>
+            <div style="font-size:9px;color:#b89650;margin-top:3px;line-height:1.4">⚠ In caso di apprendistato, comunicare preventivamente con lo studio</div>
             <div class="co-dates">
               <label>Dal</label>
               <input type="date" name="appr_dal" id="c-appr-dal">
@@ -729,22 +733,27 @@ nav{position:fixed;top:0;left:0;width:100%;z-index:200;background:var(--navy)}
               <div class="alleg-item"><input type="checkbox" name="all_pds" id="all-pds"><label for="all-pds">Permesso di Soggiorno (solo extra-UE, facoltativo)</label></div>
               <input type="file" id="file-pds" accept="image/*,.pdf" class="alleg-file-input">
             </div>
+            <div>
+              <div class="alleg-item"><input type="checkbox" name="all_disp" id="all-disp"><label for="all-disp">Disponibilità al Lavoro (facoltativo)</label></div>
+              <input type="file" id="file-disp" accept="image/*,.pdf" class="alleg-file-input">
+            </div>
           </div>
         </div>
         <div>
-          <div class="sec-head" style="margin-top:0"><div class="sec-head-line"></div><div class="sec-head-label">Firme</div></div>
+          <div class="sec-head" style="margin-top:0"><div class="sec-head-line"></div><div class="sec-head-label">Riferimenti invio</div></div>
+          <div style="font-size:9px;color:var(--muted);margin-bottom:8px;line-height:1.5">Le firme sono richieste solo in caso di stampa del modello cartaceo. Per l'invio online non sono necessarie.</div>
           <div class="sign-fields">
             <div class="sign-field">
               <div class="sign-lbl">Data</div>
               <input class="sign-input" type="date" name="data_firma" id="f-data-firma">
             </div>
             <div class="sign-field">
-              <div class="sign-lbl">Firma Datore di Lavoro</div>
-              <input class="sign-input" type="text" name="firma_datore" placeholder="Cognome Nome">
+              <div class="sign-lbl">Firma Datore di Lavoro <span style="font-size:7px;color:var(--muted)">(solo cartaceo)</span></div>
+              <input class="sign-input" type="text" name="firma_datore" placeholder="Solo se modello cartaceo">
             </div>
             <div class="sign-field">
-              <div class="sign-lbl">Firma Lavoratore</div>
-              <input class="sign-input" type="text" name="firma_lavoratore" placeholder="Cognome Nome">
+              <div class="sign-lbl">Firma Lavoratore <span style="font-size:7px;color:var(--muted)">(solo cartaceo)</span></div>
+              <input class="sign-input" type="text" name="firma_lavoratore" placeholder="Solo se modello cartaceo">
             </div>
           </div>
         </div>
@@ -839,7 +848,17 @@ let pendingPasswordSet = false;
   hash.split('&').forEach(p => { const [k,v]=p.split('='); if(k) params[k]=v||''; });
   if (params.type === 'invite' || params.type === 'recovery') {
     pendingPasswordSet = true;
+    localStorage.setItem('cdl_needs_password', '1');
     if (params.type === 'recovery') {
+      localStorage.setItem('cdl_pwd_mode', 'recovery');
+      document.addEventListener('DOMContentLoaded', () => {
+        const t = document.getElementById('setpwd-title');
+        if (t) t.innerHTML = 'Reimposta la tua <em>password.</em>';
+      });
+    }
+  } else if (localStorage.getItem('cdl_needs_password') === '1') {
+    pendingPasswordSet = true;
+    if (localStorage.getItem('cdl_pwd_mode') === 'recovery') {
       document.addEventListener('DOMContentLoaded', () => {
         const t = document.getElementById('setpwd-title');
         if (t) t.innerHTML = 'Reimposta la tua <em>password.</em>';
@@ -914,6 +933,25 @@ async function doLogin(e) {
 
 async function doLogout() {
   await sb.auth.signOut();
+}
+
+async function resetPassword(e) {
+  e.preventDefault();
+  const email = document.getElementById('li-email').value.trim();
+  const msg = document.getElementById('login-msg');
+  if (!email) { msg.textContent = 'Inserire prima l\'email.'; return; }
+  msg.style.color = 'rgba(255,255,255,.6)';
+  msg.textContent = 'Invio link in corso…';
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/area-riservata.html'
+  });
+  if (error) {
+    msg.style.color = '';
+    msg.textContent = '✗ ' + error.message;
+  } else {
+    msg.style.color = 'rgba(184,150,80,.9)';
+    msg.textContent = '✓ Link inviato! Controlla la casella email.';
+  }
 }
 
 /* ══════════════════════════════════════════════
@@ -1084,6 +1122,7 @@ function showDetail(id) {
   h += adFileRow('Documento d\'identità', r.file_doc_identita);
   h += adFileRow('Codice Fiscale', r.file_codice_fiscale);
   h += adFileRow('Permesso di Soggiorno', r.file_permesso_soggiorno);
+  h += adFileRow('Disponibilità al Lavoro', r.file_disponibilita);
 
   body.innerHTML = h;
   document.getElementById('admin-detail').style.display = 'flex';
@@ -1317,9 +1356,9 @@ async function submitForm() {
     'ore_totali','perc_parttime',
     'stipendio','superminimo','altre_voci',
     'stipendio_note','superminimo_note','altre_note',
-    'note','all_doc','all_cf','all_pds',
+    'note','all_doc','all_cf','all_pds','all_disp',
     'data_firma','firma_datore','firma_lavoratore',
-    'file_doc_identita','file_codice_fiscale','file_permesso_soggiorno'
+    'file_doc_identita','file_codice_fiscale','file_permesso_soggiorno','file_disponibilita'
   ]);
   const DATE_COLS = new Set(['indet_dal','det_dal','det_al','appr_dal','data_firma']);
   const NUM_COLS = new Set(['ore_totali','perc_parttime','stipendio','superminimo','altre_voci']);
@@ -1352,7 +1391,8 @@ async function submitForm() {
   const files = [
     { inputId: 'file-doc-id',  col: 'file_doc_identita',        label: 'Documento d\'identità' },
     { inputId: 'file-cf',      col: 'file_codice_fiscale',       label: 'Codice Fiscale' },
-    { inputId: 'file-pds',     col: 'file_permesso_soggiorno',   label: 'Permesso di Soggiorno' }
+    { inputId: 'file-pds',     col: 'file_permesso_soggiorno',   label: 'Permesso di Soggiorno' },
+    { inputId: 'file-disp',    col: 'file_disponibilita',        label: 'Disponibilità al Lavoro' }
   ];
   for (const f of files) {
     const fileInput = document.getElementById(f.inputId);
@@ -1435,6 +1475,8 @@ async function setInitialPassword(e) {
     btn.disabled = false;
     btn.innerHTML = 'Salva e accedi <span class="login-arr">→</span>';
   } else {
+    localStorage.removeItem('cdl_needs_password');
+    localStorage.removeItem('cdl_pwd_mode');
     showApp(currentUser);
   }
 }
